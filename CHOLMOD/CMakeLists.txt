@@ -29,11 +29,11 @@ message ( STATUS "Building CHOLMOD version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
+    ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -404,11 +404,15 @@ endif ( )
 
 # camd and ccolamd:
 if ( NOT NCAMD )
-    include_directories ( ${CAMD_INCLUDE_DIR} )
-    target_link_libraries ( cholmod PUBLIC ${CAMD_LIBRARIES} )
+    target_link_libraries ( cholmod PUBLIC camd )
     if ( NOT NSTATIC )
-        target_link_libraries ( cholmod_static PUBLIC ${CAMD_STATIC} )
+        if ( TARGET camd_static )
+            target_link_libraries ( cholmod_static PUBLIC camd_static )
+        else ( )
+            target_link_libraries ( cholmod_static PUBLIC camd )
+        endif ( )
     endif ( )
+
     include_directories ( ${CCOLAMD_INCLUDE_DIR} )
     target_link_libraries ( cholmod PUBLIC ${CCOLAMD_LIBRARIES} )
     if ( NOT NSTATIC )

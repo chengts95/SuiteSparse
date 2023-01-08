@@ -197,9 +197,12 @@ else ( )
 endif ( )
 
 # camd:
-target_link_libraries ( my PUBLIC ${CAMD_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${CAMD_STATIC} )
-include_directories ( ${CAMD_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC camd )
+if ( TARGET camd_static )
+    target_link_libraries ( my_static PUBLIC camd_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC camd )
+endif ( )
 
 # ccolamd:
 target_link_libraries ( my PUBLIC ${CCOLAMD_LIBRARIES} )
