@@ -29,6 +29,8 @@ message ( STATUS "Building SUITESPARSE_GPURUNTIME version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -75,8 +77,7 @@ endif ( )
 
 file ( GLOB SUITESPARSE_GPURUNTIME_SOURCES "Source/*.cpp" )
 
-set ( SUITESPARSE_GPURUNTIME_INCLUDES Include 
-    ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+set ( SUITESPARSE_GPURUNTIME_INCLUDES Include )
 
 include_directories ( ${SUITESPARSE_GPURUNTIME_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
 
@@ -95,8 +96,9 @@ set_target_properties ( suitesparse_gpuruntime PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON )
 
 target_include_directories ( suitesparse_gpuruntime PUBLIC
-        ${CUDAToolkit_INCLUDE_DIRS}
-        ${SUITESPARSE_GPURUNTIME_INCLUDES} )
+    ${CUDAToolkit_INCLUDE_DIRS}
+    ${SUITESPARSE_GPURUNTIME_INCLUDES}
+    $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
 if ( SUITESPARSE_CUDA )
     set_target_properties ( suitesparse_gpuruntime PROPERTIES POSITION_INDEPENDENT_CODE ON )
@@ -125,8 +127,9 @@ if ( NOT NSTATIC )
     endif ( )
 
     target_include_directories ( suitesparse_gpuruntime_static PUBLIC
-            ${CUDAToolkit_INCLUDE_DIRS}
-            ${SUITESPARSE_GPURUNTIME_INCLUDES} )
+        ${CUDAToolkit_INCLUDE_DIRS}
+        ${SUITESPARSE_GPURUNTIME_INCLUDES}
+        $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
     if ( SUITESPARSE_CUDA )
         set_target_properties ( suitesparse_gpuruntime_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )

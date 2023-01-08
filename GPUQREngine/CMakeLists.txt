@@ -36,6 +36,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -116,8 +118,7 @@ endif ( )
 
 set ( GPUQRENGINE_INCLUDES Include Include/Kernel
     Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
-    ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include )
 
 include_directories ( ${GPUQRENGINE_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
 
@@ -136,8 +137,9 @@ set_target_properties ( gpuqrengine PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON )
 
 target_include_directories ( gpuqrengine PUBLIC
-        ${CUDAToolkit_INCLUDE_DIRS}
-        ${GPUQRENGINE_INCLUDES} )
+    ${CUDAToolkit_INCLUDE_DIRS}
+    ${GPUQRENGINE_INCLUDES}
+    $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
 if ( SUITESPARSE_CUDA )
     set_target_properties ( gpuqrengine PROPERTIES POSITION_INDEPENDENT_CODE ON )
@@ -166,8 +168,9 @@ if ( NOT NSTATIC )
     endif ( )
 
     target_include_directories ( gpuqrengine_static PUBLIC
-            ${CUDAToolkit_INCLUDE_DIRS}
-            ${GPUQRENGINE_INCLUDES} )
+        ${CUDAToolkit_INCLUDE_DIRS}
+        ${GPUQRENGINE_INCLUDES}
+        $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
     if ( SUITESPARSE_CUDA )
         set_target_properties ( gpuqrengine_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )

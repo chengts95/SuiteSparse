@@ -28,6 +28,8 @@ message ( STATUS "Building CAMD version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -60,7 +62,7 @@ configure_file ( "Config/camd_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic camd library properties
@@ -102,9 +104,13 @@ endif ( )
 # add the library dependencies
 #-------------------------------------------------------------------------------
 
-target_link_libraries ( camd PUBLIC ${SUITESPARSE_CONFIG_LIBRARY} )
+target_link_libraries ( camd PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( camd_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( camd_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( camd_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:

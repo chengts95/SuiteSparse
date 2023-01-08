@@ -28,6 +28,8 @@ message ( STATUS "Building CXSparse version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -78,7 +80,7 @@ configure_file ( "Config/cs.h.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic cxsparse library properties
@@ -132,9 +134,13 @@ endif ( )
 # add the library dependencies
 #-------------------------------------------------------------------------------
 
-target_link_libraries ( cxsparse PUBLIC ${SUITESPARSE_CONFIG_LIBRARY} )
+target_link_libraries ( cxsparse PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( cxsparse_static PUBLIC ${SUITESPARSE_CONFIG_LIBRARY} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( cxsparse_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( cxsparse_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:

@@ -28,6 +28,8 @@ message ( STATUS "Building RBIO version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -57,7 +59,7 @@ configure_file ( "Config/RBio.h.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic rbio library properties
@@ -100,9 +102,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( rbio PUBLIC ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( rbio PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( rbio_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( rbio_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( rbio_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:

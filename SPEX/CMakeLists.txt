@@ -31,6 +31,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -69,7 +71,6 @@ configure_file ( "Config/SPEX_version.tex.in"
 
 include_directories ( SPEX_Left_LU/Source SPEX_Util/Source Include 
     SPEX_Left_LU/Demo
-    ${SUITESPARSE_CONFIG_INCLUDE_DIR} 
     ${GMP_INCLUDE_DIR} ${MPFR_INCLUDE_DIR}
     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
 
@@ -114,9 +115,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( spex PUBLIC ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( spex PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( spex_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( spex_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( spex_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # AMD:

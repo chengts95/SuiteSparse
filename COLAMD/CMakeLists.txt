@@ -28,6 +28,8 @@ message ( STATUS "Building COLAMD version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -57,7 +59,7 @@ configure_file ( "Config/colamd.h.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic colamd library properties
@@ -99,9 +101,13 @@ endif ( )
 # add the library dependencies
 #-------------------------------------------------------------------------------
 
-target_link_libraries ( colamd PUBLIC ${SUITESPARSE_CONFIG_LIBRARY} )
+target_link_libraries ( colamd PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( colamd_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( colamd_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( colamd_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:

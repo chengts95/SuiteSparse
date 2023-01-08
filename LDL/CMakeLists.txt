@@ -29,6 +29,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -62,8 +64,7 @@ configure_file ( "Config/ldl_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR}
-    ${AMD_INCLUDE_DIR} )
+include_directories ( Source Include ${AMD_INCLUDE_DIR} )
 
 #-------------------------------------------------------------------------------
 # dynamic ldl library properties
@@ -105,20 +106,23 @@ endif ( )
 # add the library dependencies
 #-------------------------------------------------------------------------------
 
+target_link_libraries ( ldl PUBLIC ${AMD_LIBRARIES} suitesparseconfig )
+
+if ( NOT NSTATIC )
+    target_link_libraries ( ldl_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( ldl_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( ldl_static PUBLIC suitesparseconfig )
+    endif ( )
+endif ( )
+
 # libm:
 if ( NOT WIN32 )
     target_link_libraries ( ldl PUBLIC m )
     if ( NOT NSTATIC )
         target_link_libraries ( ldl_static PUBLIC m )
     endif ( )
-endif ( )
-
-target_link_libraries ( ldl PUBLIC
-    ${SUITESPARSE_CONFIG_LIBRARIES} ${AMD_LIBRARIES} )
-
-if ( NOT NSTATIC )
-    target_link_libraries ( ldl_static PUBLIC
-    ${SUITESPARSE_CONFIG_STATIC} ${AMD_STATIC} )
 endif ( )
 
 #-------------------------------------------------------------------------------

@@ -37,6 +37,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../GPUQREngine/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -114,7 +116,7 @@ configure_file ( "Config/spqr_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR}
+include_directories ( Source Include
     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/Include )
 
@@ -168,9 +170,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( spqr PUBLIC ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( spqr PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( spqr_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( spqr_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # OpenMP:

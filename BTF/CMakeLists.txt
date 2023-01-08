@@ -29,6 +29,8 @@ message ( STATUS "Building BTF version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -57,7 +59,7 @@ configure_file ( "Config/btf.h.in" "${PROJECT_SOURCE_DIR}/Include/btf.h"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic btf library properties
@@ -100,9 +102,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( btf PUBLIC ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( btf PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( btf_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( btf_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( btf_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:

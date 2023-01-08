@@ -33,6 +33,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -274,7 +276,7 @@ configure_file ( "Config/cholmod_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Check Cholesky Core MatrixOps Modify Partition
-    Supernodal Include ${CMAKE_SOURCE_DIR} ${SUITESPARSE_CONFIG_INCLUDE_DIR}
+    Supernodal Include ${CMAKE_SOURCE_DIR}
     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
 
 #-------------------------------------------------------------------------------
@@ -330,9 +332,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( cholmod PUBLIC ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( cholmod PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( cholmod_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( cholmod_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( cholmod_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # OpenMP:
