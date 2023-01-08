@@ -30,7 +30,6 @@ message ( STATUS "Building SPQR version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../GPUQREngine/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
@@ -38,6 +37,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
+    ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -241,12 +241,11 @@ include_directories ( ${LAPACK_INCLUDE_DIR} )
 target_link_libraries ( spqr PUBLIC
     ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
     amd ${COLAMD_LIBRARIES}
-    camd ${CCOLAMD_LIBRARIES} )
+    camd ccolamd )
 if ( NOT NSTATIC )
     target_link_libraries ( spqr_static PUBLIC
         ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-        ${COLAMD_STATIC}
-        ${CCOLAMD_STATIC} )
+        ${COLAMD_STATIC} )
     if ( TARGET amd_static )
         target_link_libraries ( spqr_static PUBLIC amd_static )
     else ( )
@@ -256,6 +255,11 @@ if ( NOT NSTATIC )
         target_link_libraries ( spqr_static PUBLIC camd_static )
     else ( )
         target_link_libraries ( spqr_static PUBLIC camd )
+    endif ( )
+    if ( TARGET ccolamd_static )
+        target_link_libraries ( spqr_static PUBLIC ccolamd_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC ccolamd )
     endif ( )
 endif ( )
 
