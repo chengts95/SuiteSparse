@@ -266,9 +266,12 @@ else ( )
 endif ( )
 
 # ldl:
-target_link_libraries ( my PUBLIC ${LDL_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${LDL_STATIC} )
-include_directories ( ${LDL_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC ldl )
+if ( TARGET ldl_static )
+    target_link_libraries ( my_static PUBLIC ldl_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC ldl )
+endif ( )
 
 # mongoose:
 target_link_libraries ( my PRIVATE mongoose )
