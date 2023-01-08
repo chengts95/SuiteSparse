@@ -181,9 +181,12 @@ target_link_libraries ( my_static PUBLIC ${MPFR_STATIC} )
 include_directories ( ${MPFR_INCLUDE_DIR} )
 
 # amd:
-target_link_libraries ( my PUBLIC ${AMD_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${AMD_STATIC} )
-include_directories ( ${AMD_INCLUDE_DIR} )
+target_link_libraries ( my PRIVATE amd )
+if ( TARGET suitesparseconfig_static )
+    target_link_libraries ( my_static PUBLIC amd_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC amd )
+endif ( )
 
 # btf:
 target_link_libraries ( my PUBLIC ${BTF_LIBRARIES} )

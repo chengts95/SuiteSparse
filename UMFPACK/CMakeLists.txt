@@ -28,13 +28,13 @@ message ( STATUS "Building UMFPACK version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
@@ -104,8 +104,7 @@ configure_file ( "Config/umfpack_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Source Include
-    ${AMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/../AMD/Include )
+    ${CHOLMOD_INCLUDE_DIR} )
 
 #-------------------------------------------------------------------------------
 # dynamic umfpack library properties
@@ -179,9 +178,13 @@ if ( NOT WIN32 )
 endif ( )
 
 # amd:
-target_link_libraries ( umfpack PUBLIC ${AMD_LIBRARIES} )
+target_link_libraries ( umfpack PUBLIC amd )
 if ( NOT NSTATIC )
-    target_link_libraries ( umfpack_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( umfpack_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( umfpack_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # BLAS:
@@ -199,13 +202,18 @@ if ( NOT NCHOLMOD )
     # link with CHOLMOD and its dependencies, both required and optional
     target_link_libraries ( umfpack PUBLIC
         ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        ${AMD_LIBRARIES} ${COLAMD_LIBRARIES}
+        amd ${COLAMD_LIBRARIES}
         ${CAMD_LIBRARIES} ${CCOLAMD_LIBRARIES} )
     if ( NOT NSTATIC )
         target_link_libraries ( umfpack_static PUBLIC
             ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-            ${AMD_STATIC} ${COLAMD_STATIC}
+            ${COLAMD_STATIC}
             ${CAMD_STATIC} ${CCOLAMD_STATIC} )
+        if ( TARGET amd_static )
+            target_link_libraries ( umfpack_static PUBLIC amd_static )
+        else ( )
+            target_link_libraries ( umfpack_static PUBLIC amd )
+        endif ( )
     endif ( )
 endif ( )
 

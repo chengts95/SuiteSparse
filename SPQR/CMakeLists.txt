@@ -30,7 +30,6 @@ message ( STATUS "Building SPQR version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
@@ -38,6 +37,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -117,7 +117,7 @@ configure_file ( "Config/spqr_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Source Include
-    ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
+    ${COLAMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/Include )
 
 if ( SUITESPARSE_CUDA )
@@ -201,9 +201,13 @@ if ( NOT WIN32 )
 endif ( )
 
 # amd:
-target_link_libraries ( spqr PUBLIC ${AMD_LIBRARIES} )
+target_link_libraries ( spqr PUBLIC amd )
 if ( NOT NSTATIC )
-    target_link_libraries ( spqr_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( spqr_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # colamd:
@@ -236,13 +240,18 @@ include_directories ( ${LAPACK_INCLUDE_DIR} )
 # link with CHOLMOD and its dependencies, both required and optional
 target_link_libraries ( spqr PUBLIC
     ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-    ${AMD_LIBRARIES} ${COLAMD_LIBRARIES}
+    amd ${COLAMD_LIBRARIES}
     ${CAMD_LIBRARIES} ${CCOLAMD_LIBRARIES} )
 if ( NOT NSTATIC )
     target_link_libraries ( spqr_static PUBLIC
         ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-        ${AMD_STATIC} ${COLAMD_STATIC}
+        ${COLAMD_STATIC}
         ${CAMD_STATIC} ${CCOLAMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( spqr_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # CUDA

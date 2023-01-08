@@ -29,11 +29,11 @@ message ( STATUS "Building CHOLMOD version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -277,7 +277,7 @@ configure_file ( "Config/cholmod_version.tex.in"
 
 include_directories ( Check Cholesky Core MatrixOps Modify Partition
     Supernodal Include ${CMAKE_SOURCE_DIR}
-    ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
+    ${COLAMD_INCLUDE_DIR} )
 
 #-------------------------------------------------------------------------------
 # dynamic cholmod library properties
@@ -364,9 +364,13 @@ if ( NOT WIN32 )
 endif ( )
 
 # amd:
-target_link_libraries ( cholmod PUBLIC ${AMD_LIBRARIES} )
+target_link_libraries ( cholmod PUBLIC amd )
 if ( NOT NSTATIC )
-    target_link_libraries ( cholmod_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( cholmod_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( cholmod_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # colamd:
