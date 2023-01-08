@@ -237,9 +237,12 @@ else ( )
 endif ( )
 
 # gpuqrengine:
-target_link_libraries ( my PUBLIC ${GPUQRENGINE_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${GPUQRENGINE_STATIC} )
-include_directories ( ${GPUQRENGINE_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC gpuqrengine )
+if ( TARGET gpuqrengine_static )
+    target_link_libraries ( my_static PUBLIC gpuqrengine_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC gpuqrengine )
+endif ( )
 
 # GraphBLAS:
 target_link_libraries ( my PUBLIC ${GRAPHBLAS_LIBRARIES} )

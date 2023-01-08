@@ -30,7 +30,6 @@ message ( STATUS "Building SPQR version: v"
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../GPUQREngine/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
@@ -39,6 +38,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/build
     ${CMAKE_SOURCE_DIR}/../COLAMD/build
+    ${CMAKE_SOURCE_DIR}/../GPUQREngine/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -94,7 +94,10 @@ include ( SuiteSparseBLAS )     # requires cmake 3.22
 include ( SuiteSparseLAPACK )   # requires cmake 3.22
 
 add_subdirectory ( SPQRGPU )
-set ( SPQR_CUDA spqr_cuda ${CUDA_LIBRARIES} ${GPUQRENGINE_LIBRARIES} ${SUITESPARSE_GPURUNTIME_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES} )
+set ( SPQR_CUDA spqr_cuda ${CUDA_LIBRARIES} )
+if ( SUITESPARSE_CUDA )
+    list ( APPEND SPQR_CUDA gpuqrengine ${SUITESPARSE_GPURUNTIME_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES} )
+endif ( )
 
 if ( SUITESPARSE_CUDA )
     # with CUDA
@@ -121,8 +124,7 @@ include_directories ( Source Include )
 
 if ( SUITESPARSE_CUDA )
     include_directories ( 
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
-    ${CMAKE_SOURCE_DIR}/../GPUQREngine/Include )
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include )
 endif ( )
 
 #-------------------------------------------------------------------------------
