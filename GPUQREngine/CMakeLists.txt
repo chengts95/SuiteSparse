@@ -29,7 +29,6 @@ message ( STATUS "Building GPUQRENGINE version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
@@ -37,6 +36,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../COLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -217,7 +217,7 @@ if ( DEMO AND DEMO_OK )
 
     # Libraries required for Demo programs
     target_link_libraries ( gpuqrengine_demo PUBLIC gpuqrengine
-        ${CHOLMOD_LIBRARIES} amd ${COLAMD_LIBRARIES}
+        ${CHOLMOD_LIBRARIES} amd colamd
         camd ccolamd ${CHOLMOD_CUDA}
         ${SUITESPARSE_GPURUNTIME_LIBRARIES} suitesparseconfig )
 

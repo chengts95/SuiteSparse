@@ -218,9 +218,12 @@ target_link_libraries ( my_static PUBLIC ${CHOLMOD_STATIC} )
 include_directories ( ${CHOLMOD_INCLUDE_DIR} )
 
 # colamd:
-target_link_libraries ( my PUBLIC ${COLAMD_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${COLAMD_STATIC} )
-include_directories ( ${COLAMD_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC colamd )
+if ( TARGET colamd_static )
+    target_link_libraries ( my_static PUBLIC colamd_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC colamd )
+endif ( )
 
 # cxsparse:
 target_link_libraries ( my PUBLIC ${CXSPARSE_LIBRARIES} )

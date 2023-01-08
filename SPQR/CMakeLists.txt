@@ -29,7 +29,6 @@ message ( STATUS "Building SPQR version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../GPUQREngine/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
@@ -38,6 +37,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../COLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -117,7 +117,7 @@ configure_file ( "Config/spqr_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Source Include
-    ${COLAMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
+    ${CHOLMOD_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/Include )
 
 if ( SUITESPARSE_CUDA )
@@ -211,9 +211,13 @@ if ( NOT NSTATIC )
 endif ( )
 
 # colamd:
-target_link_libraries ( spqr PUBLIC ${COLAMD_LIBRARIES} )
+target_link_libraries ( spqr PUBLIC colamd )
 if ( NOT NSTATIC )
-    target_link_libraries ( spqr_static PUBLIC ${COLAMD_STATIC} )
+    if ( TARGET colamd_static )
+        target_link_libraries ( spqr_static PUBLIC colamd_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC colamd )
+    endif ( )
 endif ( )
 
 # BLAS:
@@ -240,16 +244,19 @@ include_directories ( ${LAPACK_INCLUDE_DIR} )
 # link with CHOLMOD and its dependencies, both required and optional
 target_link_libraries ( spqr PUBLIC
     ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-    amd ${COLAMD_LIBRARIES}
-    camd ccolamd )
+    amd colamd camd ccolamd )
 if ( NOT NSTATIC )
     target_link_libraries ( spqr_static PUBLIC
-        ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-        ${COLAMD_STATIC} )
+        ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC} )
     if ( TARGET amd_static )
         target_link_libraries ( spqr_static PUBLIC amd_static )
     else ( )
         target_link_libraries ( spqr_static PUBLIC amd )
+    endif ( )
+    if ( TARGET colamd_static )
+        target_link_libraries ( spqr_static PUBLIC colamd_static )
+    else ( )
+        target_link_libraries ( spqr_static PUBLIC colamd )
     endif ( )
     if ( TARGET camd_static )
         target_link_libraries ( spqr_static PUBLIC camd_static )

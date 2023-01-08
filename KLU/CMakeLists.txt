@@ -28,7 +28,6 @@ message ( STATUS "Building KLU version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
@@ -36,6 +35,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../BTF/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../COLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
@@ -96,8 +96,7 @@ configure_file ( "Config/klu_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include User
-    ${COLAMD_INCLUDE_DIR} )
+include_directories ( Source Include User )
 
 #-------------------------------------------------------------------------------
 # dynamic klu library properties
@@ -204,9 +203,13 @@ if ( NOT NSTATIC )
 endif ( )
 
 # colamd:
-target_link_libraries ( klu PUBLIC ${COLAMD_LIBRARIES} )
+target_link_libraries ( klu PUBLIC colamd )
 if ( NOT NSTATIC )
-    target_link_libraries ( klu_static PUBLIC ${COLAMD_STATIC} )
+    if ( TARGET colamd_static )
+        target_link_libraries ( klu_static PUBLIC colamd_static )
+    else ( )
+        target_link_libraries ( klu_static PUBLIC colamd )
+    endif ( )
 endif ( )
 
 # btf:
@@ -225,25 +228,30 @@ if ( NOT NCHOLMOD )
     # link with CHOLMOD and its dependencies, both required and optional
     target_link_libraries ( klu PUBLIC
         ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        amd ${COLAMD_LIBRARIES}
+        amd colamd
         camd ccolamd )
     target_link_libraries ( klu_cholmod PUBLIC
         ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        amd ${COLAMD_LIBRARIES}
+        amd colamd
         camd ccolamd )
     if ( NOT NSTATIC )
         target_link_libraries ( klu_static PUBLIC
-            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-            ${COLAMD_STATIC} )
+            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC} )
         target_link_libraries ( klu_cholmod_static PUBLIC
-            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-            ${COLAMD_STATIC} )
+            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC} )
         if ( TARGET amd_static )
             target_link_libraries ( klu_static PUBLIC amd_static )
             target_link_libraries ( klu_cholmod_static PUBLIC amd_static )
         else ( )
             target_link_libraries ( klu_static PUBLIC amd )
             target_link_libraries ( klu_cholmod_static PUBLIC amd )
+        endif ( )
+        if ( TARGET colamd_static )
+            target_link_libraries ( klu_static PUBLIC colamd_static )
+            target_link_libraries ( klu_cholmod_static PUBLIC colamd_static )
+        else ( )
+            target_link_libraries ( klu_static PUBLIC colamd )
+            target_link_libraries ( klu_cholmod_static PUBLIC colamd )
         endif ( )
         if ( TARGET camd_static )
             target_link_libraries ( klu_static PUBLIC camd_static )
