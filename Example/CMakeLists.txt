@@ -250,9 +250,12 @@ target_link_libraries ( my_static PUBLIC ${GRAPHBLAS_STATIC} )
 include_directories ( ${GRAPHBLAS_INCLUDE_DIR} )
 
 # klu:
-target_link_libraries ( my PUBLIC ${KLU_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${KLU_STATIC} )
-include_directories ( ${KLU_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC klu )
+if ( TARGET klu_static )
+    target_link_libraries ( my_static PUBLIC klu_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC klu )
+endif ( )
 
 # klu_cholmod:
 target_link_libraries ( my PUBLIC ${KLU_CHOLMOD_LIBRARIES} )
