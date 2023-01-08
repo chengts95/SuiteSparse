@@ -213,9 +213,12 @@ else ( )
 endif ( )
 
 # cholmod:
-target_link_libraries ( my PUBLIC ${CHOLMOD_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${CHOLMOD_STATIC} )
-include_directories ( ${CHOLMOD_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC cholmod )
+if ( TARGET cholmod_static )
+    target_link_libraries ( my_static PUBLIC cholmod_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC cholmod )
+endif ( )
 
 # colamd:
 target_link_libraries ( my PUBLIC colamd )

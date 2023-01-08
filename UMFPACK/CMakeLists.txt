@@ -34,6 +34,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../CHOLMOD/build
     ${CMAKE_SOURCE_DIR}/../COLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
@@ -103,8 +104,7 @@ configure_file ( "Config/umfpack_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include
-    ${CHOLMOD_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic umfpack library properties
@@ -201,30 +201,14 @@ include_directories ( ${BLAS_INCLUDE_DIRS} )
 if ( NOT NCHOLMOD )
     # link with CHOLMOD and its dependencies, both required and optional
     target_link_libraries ( umfpack PUBLIC
-        ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        amd colamd camd ccolamd )
+        cholmod ${CHOLMOD_CUDA_LIBRARIES} )
     if ( NOT NSTATIC )
         target_link_libraries ( umfpack_static PUBLIC
-            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC} )
-        if ( TARGET amd_static )
-            target_link_libraries ( umfpack_static PUBLIC amd_static )
+            ${CHOLMOD_CUDA_STATIC} )
+        if ( TARGET cholmod_static )
+            target_link_libraries ( umfpack_static PUBLIC cholmod_static )
         else ( )
-            target_link_libraries ( umfpack_static PUBLIC amd )
-        endif ( )
-        if ( TARGET colamd_static )
-            target_link_libraries ( umfpack_static PUBLIC colamd_static )
-        else ( )
-            target_link_libraries ( umfpack_static PUBLIC colamd )
-        endif ( )
-        if ( TARGET camd_static )
-            target_link_libraries ( umfpack_static PUBLIC camd_static )
-        else ( )
-            target_link_libraries ( umfpack_static PUBLIC camd )
-        endif ( )
-        if ( TARGET ccolamd_static )
-            target_link_libraries ( umfpack_static PUBLIC ccolamd_static )
-        else ( )
-            target_link_libraries ( umfpack_static PUBLIC ccolamd )
+            target_link_libraries ( umfpack_static PUBLIC cholmod )
         endif ( )
     endif ( )
 endif ( )

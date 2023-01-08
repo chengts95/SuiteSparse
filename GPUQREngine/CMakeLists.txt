@@ -36,6 +36,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
     ${CMAKE_SOURCE_DIR}/../CAMD/build
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../CHOLMOD/build
     ${CMAKE_SOURCE_DIR}/../COLAMD/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
@@ -217,7 +218,7 @@ if ( DEMO AND DEMO_OK )
 
     # Libraries required for Demo programs
     target_link_libraries ( gpuqrengine_demo PUBLIC gpuqrengine
-        ${CHOLMOD_LIBRARIES} amd colamd
+        cholmod amd colamd
         camd ccolamd ${CHOLMOD_CUDA}
         ${SUITESPARSE_GPURUNTIME_LIBRARIES} suitesparseconfig )
 
