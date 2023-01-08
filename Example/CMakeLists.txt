@@ -241,9 +241,12 @@ target_link_libraries ( my_static PUBLIC ${LDL_STATIC} )
 include_directories ( ${LDL_INCLUDE_DIR} )
 
 # mongoose:
-target_link_libraries ( my PUBLIC ${MONGOOSE_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${MONGOSE_STATIC} )
-include_directories ( ${MONGOOSE_INCLUDE_DIR} )
+target_link_libraries ( my PRIVATE mongoose )
+if ( TARGET mongoose_static )
+    target_link_libraries ( my_static PUBLIC mongoose_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC mongoose )
+endif ( )
 
 # rbio:
 target_link_libraries ( my PUBLIC ${RBIO_LIBRARIES} )
