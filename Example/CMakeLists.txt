@@ -290,9 +290,12 @@ else ( )
 endif ( )
 
 # spex:
-target_link_libraries ( my PUBLIC ${SPEX_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${SPEX_STATIC} )
-include_directories ( ${SPEX_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC spex )
+if ( TARGET spex_static )
+    target_link_libraries ( my_static PUBLIC spex_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC spex )
+endif ( )
 
 # spqr:
 target_link_libraries ( my PUBLIC ${SPQR_LIBRARIES} )
