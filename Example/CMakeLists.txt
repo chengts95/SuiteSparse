@@ -322,9 +322,12 @@ else ( )
 endif ( )
 
 # umfpack:
-target_link_libraries ( my PUBLIC ${UMFPACK_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${UMFPACK_STATIC} )
-include_directories ( ${UMFPACK_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC umfpack )
+if ( TARGET umfpack_static )
+    target_link_libraries ( my_static PUBLIC umfpack_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC umfpack )
+endif ( )
 
 #-------------------------------------------------------------------------------
 # installation location
