@@ -29,7 +29,6 @@ message ( STATUS "Building GPUQRENGINE version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
@@ -37,6 +36,7 @@ set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
     ${CMAKE_SOURCE_DIR}/../CHOLMOD/build
     ${CMAKE_SOURCE_DIR}/../COLAMD/build
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/build
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
@@ -117,8 +117,7 @@ else ( )
 endif ( )
 
 set ( GPUQRENGINE_INCLUDES Include Include/Kernel
-    Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include )
+    Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize )
 
 include_directories ( ${GPUQRENGINE_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
 
@@ -142,6 +141,9 @@ target_include_directories ( gpuqrengine PRIVATE
     $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
 if ( SUITESPARSE_CUDA )
+    target_include_directories ( gpuqrengine PRIVATE
+        $<TARGET_PROPERTY:suitesparse_gpuruntime,INTERFACE_INCLUDE_DIRECTORIES> )
+
     set_target_properties ( gpuqrengine PROPERTIES POSITION_INDEPENDENT_CODE ON )
     set_target_properties ( gpuqrengine PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
     target_link_libraries ( gpuqrengine CUDA::nvrtc CUDA::cudart_static
@@ -177,6 +179,9 @@ if ( NOT NSTATIC )
         $<TARGET_PROPERTY:suitesparseconfig,INTERFACE_INCLUDE_DIRECTORIES> )
 
     if ( SUITESPARSE_CUDA )
+        target_include_directories ( gpuqrengine_static PRIVATE
+            $<TARGET_PROPERTY:suitesparse_gpuruntime,INTERFACE_INCLUDE_DIRECTORIES> )
+
         set_target_properties ( gpuqrengine_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )
         set_target_properties ( gpuqrengine_static PROPERTIES POSITION_INDEPENDENT_CODE on )
         target_link_libraries ( gpuqrengine_static CUDA::nvrtc CUDA::cudart_static
@@ -250,7 +255,7 @@ if ( DEMO AND DEMO_OK )
     target_link_libraries ( gpuqrengine_demo PUBLIC gpuqrengine
         cholmod amd colamd
         camd ccolamd ${CHOLMOD_CUDA}
-        ${SUITESPARSE_GPURUNTIME_LIBRARIES} suitesparseconfig )
+        suitesparse_gpuruntime suitesparseconfig )
 
 else ( )
 
