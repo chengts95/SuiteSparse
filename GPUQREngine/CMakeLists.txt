@@ -28,7 +28,6 @@ message ( STATUS "Building GPUQRENGINE version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
     ${CMAKE_SOURCE_DIR}/../AMD/build
@@ -254,7 +253,7 @@ if ( DEMO AND DEMO_OK )
     # Libraries required for Demo programs
     target_link_libraries ( gpuqrengine_demo PUBLIC gpuqrengine
         cholmod amd colamd
-        camd ccolamd ${CHOLMOD_CUDA}
+        camd ccolamd cholmod_cuda
         suitesparse_gpuruntime suitesparseconfig )
 
 else ( )
