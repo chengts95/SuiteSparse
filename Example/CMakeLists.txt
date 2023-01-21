@@ -245,9 +245,12 @@ else ( )
 endif ( )
 
 # GraphBLAS:
-target_link_libraries ( my PUBLIC ${GRAPHBLAS_LIBRARIES} )
-target_link_libraries ( my_static PUBLIC ${GRAPHBLAS_STATIC} )
-include_directories ( ${GRAPHBLAS_INCLUDE_DIR} )
+target_link_libraries ( my PUBLIC graphblas )
+if ( TARGET graphblas_static )
+    target_link_libraries ( my_static PUBLIC graphblas_static )
+else ( )
+    target_link_libraries ( my_static PUBLIC graphblas )
+endif ( )
 
 # klu:
 target_link_libraries ( my PUBLIC klu )
