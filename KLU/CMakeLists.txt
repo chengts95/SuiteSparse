@@ -229,7 +229,7 @@ if ( NOT NCHOLMOD )
     endif ( )
 
     # klu:
-    target_link_libraries ( klu_cholmod PRIVATE klu ${BTF_LIBRARIES} )
+    target_link_libraries ( klu_cholmod PUBLIC klu PRIVATE ${BTF_LIBRARIES} )
     if ( NOT NSTATIC )
         target_link_libraries ( klu_cholmod_static PUBLIC
             klu_static ${BTF_STATIC} )
@@ -295,8 +295,8 @@ if ( DEMO )
     # Libraries required for Demo programs
     target_link_libraries ( klu_simple  PUBLIC klu )
     if ( NOT NCHOLMOD )
-        target_link_libraries ( kludemo  PUBLIC klu_cholmod )
-        target_link_libraries ( kluldemo PUBLIC klu_cholmod )
+        target_link_libraries ( kludemo  PUBLIC klu_cholmod ${CHOLMOD_LIBRARIES} )
+        target_link_libraries ( kluldemo PUBLIC klu_cholmod ${CHOLMOD_LIBRARIES} )
     endif ( )
 
 else ( )
