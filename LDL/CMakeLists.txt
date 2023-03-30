@@ -26,9 +26,9 @@ message ( STATUS "Building LDL version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    #${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    #${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 include ( SuiteSparsePolicy )
 
@@ -44,8 +44,15 @@ project ( ldl
 # find library dependencies
 #-------------------------------------------------------------------------------
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
+
 
 #-------------------------------------------------------------------------------
 # Configure ldl.h with version number
@@ -123,19 +130,39 @@ endif ( )
 # LDL installation location
 #-------------------------------------------------------------------------------
 
-install ( TARGETS ldl
+target_include_directories(ldl INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
+install ( TARGETS ldl 
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindLDL.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindCOLAMD.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS ldl_static
+    EXPORT ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories(ldl_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 endif ( )
 
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------

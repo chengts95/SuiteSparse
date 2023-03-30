@@ -31,7 +31,7 @@ message ( STATUS "Building CSparse version: v"
 # SuiteSparse policies (a subset)
 #-------------------------------------------------------------------------------
 
-message ( STATUS "Source:        " ${CMAKE_SOURCE_DIR} )
+message ( STATUS "Source:        " ${CMAKE_CURRENT_SOURCE_DIR} )
 message ( STATUS "Build:         " ${CMAKE_BINARY_DIR} )
 
 cmake_policy ( SET CMP0042 NEW )    # enable MACOSX_RPATH by default

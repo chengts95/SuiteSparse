@@ -27,14 +27,14 @@ message ( STATUS "Building KLU version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../BTF/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../BTF/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CCOLAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../CHOLMOD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 include ( SuiteSparsePolicy )
 
@@ -50,21 +50,39 @@ project ( klu
 # find library dependencies
 #-------------------------------------------------------------------------------
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( BTF 2.0.3 REQUIRED )
-find_package ( COLAMD 3.0.3 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
+find_package ( btf 2.0.3 REQUIRED )
+set(BTF_STATIC SuiteSparse::btf_static)
+set(BTF_LIBRARIES SuiteSparse::btf)
+find_package ( colamd 3.0.3 REQUIRED )
+set(COLAMD_STATIC SuiteSparse::colamd_static)
+set(COLAMD_LIBRARIES SuiteSparse::colamd)
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
+
 
 option ( NCHOLMOD "ON: do not use CHOLMOD.  OFF (default): use CHOLMOD" off )
 
 if ( NOT NCHOLMOD )
     # look for CHOLMOD (optional fill-reducing orderings)
-    find_package ( CHOLMOD 4.0.3 )
+    find_package ( cholmod 4.0.3 )
+    set(CHOLMOD_STATIC SuiteSparse::cholmod_static)
+    set(CHOLMOD_LIBRARIES SuiteSparse::cholmod)
     find_package ( CHOLMOD_CUDA 4.0.3 )
     # look for CHOLMOD's dependencies: AMD and COLAMD are required.  CAMD and
     # CCOLAMD are optional, but must be found if CHOLMOD was built with them.
-    find_package ( CAMD 3.0.3 )
-    find_package ( CCOLAMD 3.0.3 )
+    find_package ( camd 3.0.3 )
+    set(CAMD_STATIC SuiteSparse::camd_static)
+    set(CAMD_LIBRARIES SuiteSparse::camd)
+    find_package ( ccolamd 3.0.3 )
+    set(CCOLAMD_STATIC SuiteSparse::ccolamd_static)
+    set(CCOLAMD_LIBRARIES SuiteSparse::ccolamd)
     if ( NOT CHOLMOD_FOUND OR NOT AMD_FOUND OR NOT COLAMD_FOUND )
         # CHOLMOD not found so disable it
         set ( NCHOLMOD true )
@@ -236,35 +254,62 @@ endif ( )
 #-------------------------------------------------------------------------------
 # KLU installation location
 #-------------------------------------------------------------------------------
-
+target_include_directories( klu INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 install ( TARGETS klu
+    EXPORT ${PROJECT_NAME}Config
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindKLU.cmake
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindKLU_CHOLMOD.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES
+#     ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindKLU.cmake
+#     ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindKLU_CHOLMOD.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
 
 if ( NOT NSTATIC )
+target_include_directories( klu_static INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
     install ( TARGETS klu_static
+        EXPORT ${PROJECT_NAME}Config
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
 endif ( )
 
 if ( NOT NCHOLMOD )
+target_include_directories(klu_cholmod INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
     install ( TARGETS klu_cholmod
+        EXPORT ${PROJECT_NAME}Config
         LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
     if ( NOT NSTATIC )
+    target_include_directories( klu_cholmod_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
         install ( TARGETS klu_cholmod_static
+        EXPORT ${PROJECT_NAME}Config
             ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
     endif ( )
 endif ( )
 
+
+
+install (EXPORT  ${PROJECT_NAME}Config
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------

@@ -33,18 +33,18 @@
 # include files for LDL
 find_path ( LDL_INCLUDE_DIR
     NAMES ldl.h
-    HINTS ${CMAKE_SOURCE_DIR}/..
-    HINTS ${CMAKE_SOURCE_DIR}/../SuiteSparse/LDL
-    HINTS ${CMAKE_SOURCE_DIR}/../LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/..
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse/LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../LDL
     PATH_SUFFIXES include Include
 )
 
 # dynamic LDL library (or static if no dynamic library was built)
 find_library ( LDL_LIBRARY
     NAMES ldl ldl_static
-    HINTS ${CMAKE_SOURCE_DIR}/..
-    HINTS ${CMAKE_SOURCE_DIR}/../SuiteSparse/LDL
-    HINTS ${CMAKE_SOURCE_DIR}/../LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/..
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse/LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../LDL
     PATH_SUFFIXES lib build build/Release build/Debug
 )
 
@@ -60,9 +60,9 @@ endif ( )
 # static LDL library
 find_library ( LDL_STATIC
     NAMES ${STATIC_NAME}
-    HINTS ${CMAKE_SOURCE_DIR}/..
-    HINTS ${CMAKE_SOURCE_DIR}/../SuiteSparse/LDL
-    HINTS ${CMAKE_SOURCE_DIR}/../LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/..
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse/LDL
+    HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../LDL
     PATH_SUFFIXES lib build build/Release build/Debug
 )
 

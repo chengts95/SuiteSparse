@@ -1,12 +1,12 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Mongoose/CMakeLists.txt: instructions for building Mongoose with cmake
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 #
 # Mongoose, Copyright (c) 2018-2022, All Rights Reserved.
-#   Nuri Yeralan, Microsoft Research
-#   Scott Kolodziej, Texas A&M University
-#   Tim Davis, Texas A&M University
-#   William Hager, University of Florida.
+# Nuri Yeralan, Microsoft Research
+# Scott Kolodziej, Texas A&M University
+# Tim Davis, Texas A&M University
+# William Hager, University of Florida.
 #
 # SPDX-License-Identifier: GPL-3.0-only
 #
@@ -19,33 +19,31 @@
 # To install Mongoose in /usr/local/lib and /usr/local/include,
 # and also in ../lib, ../include, and ../bin:
 #
-#   sudo make install
+# sudo make install
 #
 # To install only in ../lib and ../include (no sudo required):
 #
-#   make local ; make install
+# make local ; make install
 #
 # To remove all compiled files and libraries (except installed ones):
 #
-#   make distclean
+# make distclean
 
-cmake_minimum_required ( VERSION 3.19 )
+cmake_minimum_required(VERSION 3.19)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # SuiteSparse policies
-#-------------------------------------------------------------------------------
-
-set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+# -------------------------------------------------------------------------------
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+        ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules)
 
 # always build the static libraries (needed by the mongoose program)
-set ( NSTATIC false )
+set(NSTATIC false)
 
-include ( SuiteSparsePolicy )
+include(SuiteSparsePolicy)
 
-#-------------------------------------------------------------------------------
-
+# -------------------------------------------------------------------------------
 set(Mongoose_DATE "Jan 17, 2023")
 set(Mongoose_NUMERIC_DATE "2023-01-17")
 set(Mongoose_VERSION_MAJOR 3)
@@ -57,27 +55,28 @@ project(Mongoose
         LANGUAGES CXX C)
 
 # Mongoose installation location
-include ( GNUInstallDirs )
+include(GNUInstallDirs)
 
 # Configure files to pass CMake information
-configure_file (
+configure_file(
         "Version/Mongoose.hpp.in"
         "${PROJECT_SOURCE_DIR}/Include/Mongoose.hpp"
         NEWLINE_STYLE LF
 )
-configure_file (
+configure_file(
         "Version/title-info.tex.in"
         "${PROJECT_SOURCE_DIR}/Doc/title-info.tex"
         NEWLINE_STYLE LF
 )
-configure_file (
+configure_file(
         "Version/codemeta.json.in"
         "${PROJECT_SOURCE_DIR}/codemeta.json"
         NEWLINE_STYLE LF
 )
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
+find_package(suitesparseconfig 7.0.0 REQUIRED)
 
+set(SUITESPARSE_CONFIG_LIBRARIES PUBLIC SuiteSparse::suitesparseconfig )
 include_directories("${PROJECT_BINARY_DIR}")
 
 set(MONGOOSE_FILES
@@ -121,7 +120,7 @@ set(MONGOOSE_FILES
         Source/Mongoose_Sanitize.cpp
         Source/Mongoose_Version.cpp
         Source/Mongoose_Waterdance.cpp
-        )
+)
 
 set(NAPHEAP_FILES
         Include/Mongoose_QPBoundary.hpp
@@ -142,7 +141,7 @@ set(NAPHEAP_FILES
         Source/Mongoose_QPNapDown.cpp
         Source/Mongoose_QPNapsack.cpp
         Source/Mongoose_QPNapUp.cpp
-        )
+)
 
 set(MMIO_FILES
         External/mmio/Source/mmio.c
@@ -163,13 +162,13 @@ set(DEMO_FILES
 # Specify the Include directory for *.hpp files
 include_directories(Include
         External/mmio/Include
-        )
+)
 
 # Require C++11... Someday.
 set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories ( ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include_directories(${SUITESPARSE_CONFIG_INCLUDE_DIR})
 
 # set the output directories
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -182,43 +181,43 @@ set_property(TARGET mongoose_lib PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(mongoose_lib
         PROPERTIES OUTPUT_NAME mongoose)
 
-if ( MSVC )
-    set_target_properties ( mongoose_lib PROPERTIES
-        OUTPUT_NAME mongoose_static )
-endif ( )
+if(MSVC)
+        set_target_properties(mongoose_lib PROPERTIES
+                OUTPUT_NAME mongoose_static)
+endif()
 
-target_link_libraries(mongoose_lib ${SUITESPARSE_CONFIG_LIBRARY})
+target_link_libraries(mongoose_lib ${SUITESPARSE_CONFIG_LIBRARIES})
 
 # Build the Mongoose library for dynamic linking
 add_library(mongoose_dylib SHARED ${MONGOOSE_LIB_FILES})
 set_property(TARGET mongoose_dylib PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(mongoose_dylib
         PROPERTIES OUTPUT_NAME mongoose
-        WINDOWS_EXPORT_ALL_SYMBOLS ON )
+        WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-target_link_libraries(mongoose_dylib ${SUITESPARSE_CONFIG_LIBRARY})
+target_link_libraries(mongoose_dylib ${SUITESPARSE_CONFIG_LIBRARIES})
 
 # if(CMAKE_MAJOR_VERSION GREATER 2)
-#     set_target_properties(mongoose_dylib PROPERTIES VERSION ${PROJECT_VERSION})
-#     set_target_properties(mongoose_dylib PROPERTIES SOVERSION ${Mongoose_VERSION_MAJOR})
+# set_target_properties(mongoose_dylib PROPERTIES VERSION ${PROJECT_VERSION})
+# set_target_properties(mongoose_dylib PROPERTIES SOVERSION ${Mongoose_VERSION_MAJOR})
 # else()
-    set_target_properties(mongoose_dylib PROPERTIES VERSION 
+set_target_properties(mongoose_dylib PROPERTIES VERSION
         ${Mongoose_VERSION_MAJOR}.${Mongoose_VERSION_MINOR}.${Mongoose_VERSION_PATCH})
-    set_target_properties(mongoose_dylib PROPERTIES SOVERSION
+set_target_properties(mongoose_dylib PROPERTIES SOVERSION
         ${Mongoose_VERSION_MAJOR})
-# endif()
 
+# endif()
 set_target_properties(mongoose_dylib PROPERTIES PUBLIC_HEADER Include/Mongoose.hpp)
 target_include_directories(mongoose_dylib PRIVATE .)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 # Build the Mongoose debug/test library
 add_library(mongoose_lib_dbg STATIC ${MONGOOSE_LIB_FILES})
 set_target_properties(mongoose_lib_dbg
         PROPERTIES OUTPUT_NAME mongoose_dbg)
 
-target_link_libraries(mongoose_lib_dbg ${SUITESPARSE_CONFIG_LIBRARY})
+target_link_libraries(mongoose_lib_dbg ${SUITESPARSE_CONFIG_LIBRARIES})
 
 # Build the Mongoose executable
 add_executable(mongoose_exe ${EXE_FILES})
@@ -301,54 +300,62 @@ target_link_libraries(mongoose_unit_test_edgesep mongoose_lib_dbg)
 set_target_properties(mongoose_unit_test_edgesep PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTING_OUTPUT_PATH})
 add_test(Unit_Test_EdgeSep ./tests/mongoose_unit_test_edgesep)
 
-if ( $ENV{MONGOOSE_COVERAGE} )
-    set ( COV on )
-else ( )
-    set ( COV off )
-endif ( )
+if($ENV{MONGOOSE_COVERAGE})
+        set(COV on)
+else()
+        set(COV off)
+endif()
 
-option ( MONGOOSE_COVERAGE "OFF: do not compile debug library with test coverage.  ON: debug with test coverage" ${COV} )
-message ( STATUS "test coverage for debug library: ${MONGOOSE_COVERAGE}" )
+option(MONGOOSE_COVERAGE "OFF: do not compile debug library with test coverage.  ON: debug with test coverage" ${COV})
+message(STATUS "test coverage for debug library: ${MONGOOSE_COVERAGE}")
 
 message(STATUS "CMAKE_CXX_COMPILER: " ${BoldBlue} ${CMAKE_CXX_COMPILER_ID} ${ColourReset})
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-    # using Clang
-    SET(CMAKE_CXX_FLAGS "-O3 -fwrapv")
-    # Debug flags for Clang
-    SET(CMAKE_CXX_FLAGS_DEBUG "-g -fwrapv")
-    SET(CMAKE_C_FLAGS_DEBUG "-g")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g")
-    if ( MONGOOSE_COVERAGE )
-        SET ( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage" ) 
-        SET ( CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} --coverage" )
-        SET ( CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage" )
-    endif ( )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # using GCC
-    SET(CMAKE_CXX_FLAGS "-O3 -fwrapv")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable -Wno-unused-variable" )
-    # Debug flags for GCC
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-        message(WARNING "${BoldRed} WARNING:${ColourReset} Your compiler does not support the C++11 ISO standard. Future versions of Mongoose will require a compiler with C++11 support. We recommend you upgrade to at least GCC 4.6.")
-    endif ()
-    SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -fwrapv -W -Wshadow -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings ")
-    SET(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall -fwrapv -W ")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-    if ( MONGOOSE_COVERAGE )
-        SET ( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage" ) 
-        SET ( CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage" )
-        SET ( CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage" )
-    endif ( )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    # using Intel C++
-    SET(CMAKE_CXX_FLAGS "-O3 -no-prec-div -xHOST -ipo -fwrapv")
-    # Debug flags for Intel
-    SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -fwrapv")
-    SET(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall")
-#elseif ( MSVC )
-    # using Visual Studio C++
-endif ()
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+        # using Clang
+        SET(CMAKE_CXX_FLAGS "-O3 -fwrapv")
+
+        # Debug flags for Clang
+        SET(CMAKE_CXX_FLAGS_DEBUG "-g -fwrapv")
+        SET(CMAKE_C_FLAGS_DEBUG "-g")
+        SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g")
+
+        if(MONGOOSE_COVERAGE)
+                SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+                SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} --coverage")
+                SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
+        endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        # using GCC
+        SET(CMAKE_CXX_FLAGS "-O3 -fwrapv")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable -Wno-unused-variable")
+
+        # Debug flags for GCC
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+                message(WARNING "${BoldRed} WARNING:${ColourReset} Your compiler does not support the C++11 ISO standard. Future versions of Mongoose will require a compiler with C++11 support. We recommend you upgrade to at least GCC 4.6.")
+        endif()
+
+        SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -fwrapv -W -Wshadow -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings ")
+        SET(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall -fwrapv -W ")
+        SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+
+        if(MONGOOSE_COVERAGE)
+                SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+                SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+                SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+        endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+        # using Intel C++
+        SET(CMAKE_CXX_FLAGS "-O3 -no-prec-div -xHOST -ipo -fwrapv")
+
+        # Debug flags for Intel
+        SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -fwrapv")
+        SET(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall")
+
+        # elseif ( MSVC )
+        # using Visual Studio C++
+endif()
 
 set_target_properties(mongoose_lib_dbg PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
 set_target_properties(mongoose_lib_dbg PROPERTIES LINK_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
@@ -373,16 +380,16 @@ set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1) # Necessary for gcov - prevents file.c
 file(COPY Tests/runTests DESTINATION ${CMAKE_BINARY_DIR})
 
 add_custom_command(TARGET mongoose_lib
-                   POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mongoose_lib> ${PROJECT_SOURCE_DIR}/Lib
-                   COMMENT "Copying libmongoose (static) to root Lib directory"
-        )
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mongoose_lib> ${PROJECT_SOURCE_DIR}/Lib
+        COMMENT "Copying libmongoose (static) to root Lib directory"
+)
 
 add_custom_command(TARGET mongoose_dylib
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mongoose_dylib> ${PROJECT_SOURCE_DIR}/Lib
         COMMENT "Copying libmongoose (dynamic) to root Lib directory"
-        )
+)
 
 add_custom_target(purge
         COMMAND rm -rf ${CMAKE_BINARY_DIR}/*
@@ -399,33 +406,35 @@ add_custom_target(purge
         COMMAND rm -f ${PROJECT_SOURCE_DIR}/Matrix/*.tar.gz
         COMMAND rm -f ${PROJECT_SOURCE_DIR}/Matrix/*.csv
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
+)
 
 add_custom_target(userguide
         COMMAND make
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Doc
-        )
+)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Mongoose installation location
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+install(TARGETS mongoose_dylib
+        EXPORT ${PROJECT_NAME}
+        LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
+        ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+        RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+        PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR})
+install(TARGETS mongoose_lib
+        EXPORT ${PROJECT_NAME}
+        ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR})
+install(TARGETS mongoose_exe
+        EXPORT ${PROJECT_NAME}
+        RUNTIME DESTINATION ${SUITESPARSE_BINDIR})
 
-install ( TARGETS mongoose_dylib
-    LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
-    ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
-    RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
-    PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( TARGETS mongoose_lib
-    ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
-install ( TARGETS mongoose_exe
-    RUNTIME DESTINATION ${SUITESPARSE_BINDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindMongoose.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+install(EXPORT ${PROJECT_NAME}
+        FILE ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # report status
-#-------------------------------------------------------------------------------
-
-include ( SuiteSparseReport )
-
+# -------------------------------------------------------------------------------
+include(SuiteSparseReport)

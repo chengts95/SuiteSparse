@@ -16,7 +16,7 @@
 cmake_minimum_required ( VERSION 3.19 )
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/../cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules )
 
 include ( GraphBLAS_version )
 
@@ -281,3 +281,29 @@ install ( TARGETS graphblas_matlab
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+target_include_directories( graphblas_matlab INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+install ( TARGETS graphblas_matlab
+    EXPORT ${PROJECT_NAME}Config
+    LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
+    ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+    RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+    PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+
+    
+
+    
+        
+install (EXPORT  ${PROJECT_NAME}Config
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE GraphBLAS::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+    
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+        # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)

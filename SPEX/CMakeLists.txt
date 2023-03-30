@@ -27,10 +27,10 @@ message ( STATUS "Building SPEX version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 include ( SuiteSparsePolicy )
 
@@ -46,9 +46,20 @@ project ( spex
 # find library dependencies
 #-------------------------------------------------------------------------------
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( COLAMD 3.0.3 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
+find_package ( colamd 3.0.3 REQUIRED )
+set(COLAMD_STATIC SuiteSparse::colamd_static)
+set(COLAMD_LIBRARIES SuiteSparse::colamd)
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
 find_package ( GMP 6.1.2 REQUIRED )     # from SPEX/cmake_modules
 find_package ( MPFR 4.0.2 REQUIRED )    # from SPEX/cmake_modules
 
@@ -159,7 +170,7 @@ install ( TARGETS spex
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindSPEX.cmake
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindSPEX.cmake
     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
     COMPONENT Development )
 if ( NOT NSTATIC )

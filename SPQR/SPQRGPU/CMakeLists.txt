@@ -70,12 +70,14 @@ include_directories ( ${SPQR_CUDA_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
 
 target_include_directories ( spqr_cuda PUBLIC
         ${CUDAToolkit_INCLUDE_DIRS}
+        PRIVATE
         ${SPQR_CUDA_INCLUDES} )
 set_target_properties ( spqr_cuda PROPERTIES POSITION_INDEPENDENT_CODE ON )
 set_target_properties ( spqr_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
 
 target_include_directories ( spqr_cuda_static PUBLIC
         ${CUDAToolkit_INCLUDE_DIRS}
+        PRIVATE
         ${SPQR_CUDA_INCLUDES} )
 set_target_properties ( spqr_cuda_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )
 set_target_properties ( spqr_cuda_static PROPERTIES POSITION_INDEPENDENT_CODE on )
@@ -93,9 +95,37 @@ endif ( )
 # installation location
 #-------------------------------------------------------------------------------
 
-install ( TARGETS spqr_cuda
+
+target_include_directories(spqr_cuda INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
+install ( TARGETS  spqr_cuda
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
-    RUNTIME DESTINATION ${SUITESPARSE_BINDIR} )
-install ( TARGETS spqr_cuda_static
-    ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+    PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindCOLAMD.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
+if ( NOT NSTATIC )
+    install ( TARGETS  spqr_cuda_static
+    EXPORT ${PROJECT_NAME}
+        ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories( spqr_cuda_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+endif ( )
+
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)

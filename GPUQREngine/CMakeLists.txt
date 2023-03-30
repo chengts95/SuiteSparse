@@ -28,14 +28,14 @@ message ( STATUS "Building GPUQRENGINE version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../CAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../CCOLAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../CHOLMOD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -62,7 +62,12 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # for the library itself
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
 
 if ( SUITESPARSE_CUDA )
     find_package ( SuiteSparse_GPURuntime 2.0.3 REQUIRED )
@@ -116,7 +121,7 @@ endif ( )
 
 set ( GPUQRENGINE_INCLUDES Include Include/Kernel
     Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
     ${SUITESPARSE_CONFIG_INCLUDE_DIR} )
 
 include_directories ( ${GPUQRENGINE_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
@@ -184,7 +189,7 @@ install ( TARGETS gpuqrengine
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindGPUQREngine.cmake
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindGPUQREngine.cmake
     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
     COMPONENT Development )
 if ( NOT NSTATIC )

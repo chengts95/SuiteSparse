@@ -14,7 +14,7 @@
 cmake_minimum_required ( VERSION 3.19 )
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 
 include ( GraphBLAS_version )
 
@@ -496,7 +496,7 @@ install ( TARGETS graphblas
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindGraphBLAS.cmake
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindGraphBLAS.cmake
     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
     COMPONENT Development )
 if ( NOT NSTATIC )

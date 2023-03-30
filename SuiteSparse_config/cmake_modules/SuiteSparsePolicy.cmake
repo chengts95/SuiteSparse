@@ -81,6 +81,11 @@ cmake_policy ( SET CMP0048 NEW )    # VERSION variable policy
 cmake_policy ( SET CMP0054 NEW )    # if ( expression ) handling policy
 cmake_policy ( SET CMP0104 NEW )    # initialize CUDA architectures
 
+set(CMAKE_PREFIX_PATH 
+${CMAKE_PREFIX_PATH}
+${CMAKE_INSTALL_PREFIX}/lib/cmake
+)
+
 if ( WIN32 )
     set ( CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true )
     add_compile_definitions ( _CRT_SECURE_NO_WARNINGS )
@@ -92,7 +97,7 @@ include ( GNUInstallDirs )
 
 # add the cmake_modules folder for this package to the module path
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 
 # NSTATIC option
 if ( NSTATIC_DEFAULT_ON )
@@ -107,11 +112,11 @@ option ( LOCAL_INSTALL "Install in SuiteSparse/lib" off )
 if ( SUITESPARSE_SECOND_LEVEL )
     # some packages in SuiteSparse are in SuiteSparse/Package/Package
     set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-        ${CMAKE_SOURCE_DIR}/../../lib/cmake )
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/cmake )
 else ( )
     # most packages in SuiteSparse are located in SuiteSparse/Package
     set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-        ${CMAKE_SOURCE_DIR}/../lib/cmake )
+        ${CMAKE_CURRENT_SOURCE_DIR}/../lib/cmake )
 endif ( )
 
 # add the ./build folder to the runpath so other SuiteSparse packages can
@@ -127,13 +132,13 @@ if ( LOCAL_INSTALL )
     if ( SUITESPARSE_SECOND_LEVEL )
         # the package is normally located at the 2nd level inside SuiteSparse
         # (SuiteSparse/GraphBLAS/GraphBLAS/ for example)
-        if ( EXISTS ${CMAKE_SOURCE_DIR}/../../SuiteSparse_config )
+        if ( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../SuiteSparse_config )
             set ( INSIDE_SUITESPARSE true )
         endif ( )
     else ( )
         # typical case, the package is at the 1st level inside SuiteSparse
         # (SuiteSparse/AMD for example)
-        if ( EXISTS ${CMAKE_SOURCE_DIR}/../SuiteSparse_config )
+        if ( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config )
             set ( INSIDE_SUITESPARSE true )
         endif ( )
     endif ( )
@@ -148,9 +153,9 @@ if ( INSIDE_SUITESPARSE )
     # ../lib and ../include exist: the package is inside SuiteSparse.
     # find ( REAL_PATH ...) requires cmake 3.19.
     if ( SUITESPARSE_SECOND_LEVEL )
-        file ( REAL_PATH  ${CMAKE_SOURCE_DIR}/../.. SUITESPARSE_LOCAL_PREFIX )
+        file ( REAL_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/../.. SUITESPARSE_LOCAL_PREFIX )
     else ( )
-        file ( REAL_PATH  ${CMAKE_SOURCE_DIR}/..    SUITESPARSE_LOCAL_PREFIX )
+        file ( REAL_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/..    SUITESPARSE_LOCAL_PREFIX )
     endif ( )
 endif ( )
 

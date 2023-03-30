@@ -27,8 +27,8 @@ message ( STATUS "Building SUITESPARSE_GPURUNTIME version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -54,7 +54,12 @@ endif ( )
 # find library dependencies
 #-------------------------------------------------------------------------------
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
 
 #-------------------------------------------------------------------------------
 # configure files
@@ -98,6 +103,7 @@ set_target_properties ( suitesparse_gpuruntime PROPERTIES
 
 target_include_directories ( suitesparse_gpuruntime PUBLIC
         ${CUDAToolkit_INCLUDE_DIRS}
+        PRIVATE
         ${SUITESPARSE_GPURUNTIME_INCLUDES} )
 
 if ( SUITESPARSE_CUDA )
@@ -127,6 +133,7 @@ if ( NOT NSTATIC )
 
     target_include_directories ( suitesparse_gpuruntime_static PUBLIC
             ${CUDAToolkit_INCLUDE_DIRS}
+            PRIVATE
             ${SUITESPARSE_GPURUNTIME_INCLUDES} )
 
     if ( SUITESPARSE_CUDA )
@@ -141,20 +148,40 @@ endif ( )
 # SuiteSparse_GPURuntime installation location
 #-------------------------------------------------------------------------------
 
+
+target_include_directories(suitesparse_gpuruntime INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
 install ( TARGETS suitesparse_gpuruntime
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindSuiteSparse_GPURuntime.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindCOLAMD.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS suitesparse_gpuruntime_static
+    EXPORT ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories(suitesparse_gpuruntime_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 endif ( )
 
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # report status
 #-------------------------------------------------------------------------------

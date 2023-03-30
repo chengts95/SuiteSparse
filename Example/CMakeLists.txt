@@ -41,8 +41,8 @@ include ( GNUInstallDirs )
 
 # set the module path for all Find*.cmake files.
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../lib/cmake/SuiteSparse
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../lib/cmake/SuiteSparse
     ${CMAKE_INSTALL_PREFIX}/lib/cmake/SuiteSparse )
 
 #-------------------------------------------------------------------------------
@@ -58,31 +58,72 @@ project ( my
 #-------------------------------------------------------------------------------
 
 # look for all SuiteSparse packages:
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
-find_package ( BTF 2.0.3 REQUIRED )
-find_package ( CAMD 3.0.3 REQUIRED )
-find_package ( CCOLAMD 3.0.3 REQUIRED )
-find_package ( COLAMD 3.0.3 REQUIRED )
-find_package ( CHOLMOD 4.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+set(Suitesparseconfig_STATIC SuiteSparse::suitesparseconfig_static)
+set(Suitesparseconfig_LIBRARIES SuiteSparse::suitesparseconfig)
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
+
+find_package ( btf 2.0.3 REQUIRED )
+set(BTF_STATIC SuiteSparse::btf_static)
+set(BTF_LIBRARIES SuiteSparse::btf)
+find_package ( camd 3.0.3 REQUIRED )
+set(CAMD_STATIC SuiteSparse::camd_static)
+set(CAMD_LIBRARIES SuiteSparse::camd)
+find_package ( ccolamd 3.0.3 REQUIRED )
+set(CCOLAMD_STATIC SuiteSparse::ccolamd_static)
+set(CCOLAMD_LIBRARIES SuiteSparse::ccolamd)
+find_package ( colamd 3.0.3 REQUIRED )
+set(COLAMD_STATIC SuiteSparse::colamd_static)
+set(COLAMD_LIBRARIES SuiteSparse::colamd)
+find_package ( cholmod 4.0.3 REQUIRED )
+set(CHOLMOD_STATIC SuiteSparse::cholmod_static)
+set(CHOLMOD_LIBRARIES SuiteSparse::cholmod)
 find_package ( CHOLMOD_CUDA 4.0.3 REQUIRED )
-find_package ( CXSparse 4.0.3 REQUIRED )
-find_package ( GPUQREngine 2.0.3 REQUIRED )
-find_package ( GraphBLAS 7.4.1 REQUIRED )
-find_package ( KLU 2.0.3 REQUIRED )
+find_package ( cxsparse 4.0.3 REQUIRED )
+set(CXSparse_STATIC SuiteSparse::cxsparse_static)
+set(CXSparse_LIBRARIES SuiteSparse::cxsparse)
+find_package ( gpuqrengine 2.0.3 REQUIRED )
+set(GPUQREngine_STATIC SuiteSparse::gpuqrengine_static)
+set(GPUQREngine_LIBRARIES SuiteSparse::gpuqrengine)
+find_package ( graphblas 7.4.1 REQUIRED )
+set(GraphBLAS_STATIC SuiteSparse::graphblas_static)
+set(GraphBLAS_LIBRARIES SuiteSparse::graphblas)
+find_package ( klu 2.0.3 REQUIRED )
+set(KLU_STATIC SuiteSparse::klu_static)
+set(KLU_LIBRARIES SuiteSparse::klu)
 find_package ( KLU_CHOLMOD 2.0.3 REQUIRED )
-find_package ( LDL 3.0.3 REQUIRED )
-find_package ( Mongoose 3.0.4 REQUIRED )
-find_package ( RBio 3.0.3 REQUIRED )
-find_package ( SPEX 2.0.3 REQUIRED )
+find_package ( ldl 3.0.3 REQUIRED )
+set(LDL_STATIC SuiteSparse::ldl_static)
+set(LDL_LIBRARIES SuiteSparse::ldl)
+find_package ( mongoose 3.0.4 REQUIRED )
+set(Mongoose_STATIC SuiteSparse::mongoose_static)
+set(Mongoose_LIBRARIES SuiteSparse::mongoose)
+find_package ( rbio 3.0.3 REQUIRED )
+set(RBio_STATIC SuiteSparse::rbio_static)
+set(RBio_LIBRARIES SuiteSparse::rbio)
+find_package ( spex 2.0.3 REQUIRED )
+set(SPEX_STATIC SuiteSparse::spex_static)
+set(SPEX_LIBRARIES SuiteSparse::spex)
 find_package ( SuiteSparse_GPURuntime 2.0.3 REQUIRED )
-find_package ( SPQR 3.0.3 REQUIRED )
+find_package ( spqr 3.0.3 REQUIRED )
+set(SPQR_STATIC SuiteSparse::spqr_static)
+set(SPQR_LIBRARIES SuiteSparse::spqr)
 find_package ( SPQR_CUDA 3.0.3 REQUIRED )
-find_package ( UMFPACK 6.1.0 REQUIRED )
+find_package ( umfpack 6.1.0 REQUIRED )
+set(UMFPACK_STATIC SuiteSparse::umfpack_static)
+set(UMFPACK_LIBRARIES SuiteSparse::umfpack)
 
 # look for all external libaries:
 find_package ( OpenMP REQUIRED )
 find_package ( GMP 6.1.2 REQUIRED )
+
 find_package ( MPFR 4.0.2 REQUIRED )
 include ( SuiteSparseBLAS )
 

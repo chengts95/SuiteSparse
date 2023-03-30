@@ -28,15 +28,15 @@ message ( STATUS "Building SPQR version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../GPUQREngine/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CCOLAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CHOLMOD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../GPUQREngine/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_GPURuntime/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -72,18 +72,36 @@ else ( )
     find_package ( OpenMP )
 endif ( )
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
-find_package ( COLAMD 3.0.3 REQUIRED )
-find_package ( CHOLMOD 4.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
+
+find_package ( colamd 3.0.3 REQUIRED )
+set(COLAMD_STATIC SuiteSparse::colamd_static)
+set(COLAMD_LIBRARIES SuiteSparse::colamd)
+find_package ( cholmod 4.0.3 REQUIRED )
+set(CHOLMOD_STATIC SuiteSparse::cholmod_static)
+set(CHOLMOD_LIBRARIES SuiteSparse::cholmod)
 # look for CHOLMOD's dependencies: AMD and COLAMD are required.  CAMD and
 # CCOLAMD are optional, but must be found if CHOLMOD was built with them.
-find_package ( CAMD 3.0.3 )
-find_package ( CCOLAMD 3.0.3 )
+find_package ( camd 3.0.3 )
+set(CAMD_STATIC SuiteSparse::camd_static)
+set(CAMD_LIBRARIES SuiteSparse::camd)
+find_package ( ccolamd 3.0.3 )
+set(CCOLAMD_STATIC SuiteSparse::camd_static)
+set(CCOLAMD_LIBRARIES SuiteSparse::camd)
 
 if ( SUITESPARSE_CUDA )
     find_package ( SuiteSparse_GPURuntime 2.0.3 REQUIRED )
-    find_package ( GPUQREngine 2.0.3 REQUIRED )
+    find_package ( gpuqrengine 2.0.3 REQUIRED )
+    set(GPUQRENGINE_STATIC SuiteSparse::gpuqrengine_static)
+    set(GPUQRENGINE_LIBRARIES SuiteSparse::gpuqrengine)
     find_package ( CHOLMOD_CUDA 4.0.3 REQUIRED )
 endif ( )
 
@@ -116,12 +134,12 @@ configure_file ( "Config/spqr_version.tex.in"
 
 include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR}
     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/Include )
+    ${CMAKE_CURRENT_SOURCE_DIR}/../CHOLMOD/Include )
 
 if ( SUITESPARSE_CUDA )
     include_directories ( 
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
-    ${CMAKE_SOURCE_DIR}/../GPUQREngine/Include )
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../GPUQREngine/Include )
 endif ( )
 
 #-------------------------------------------------------------------------------
@@ -246,22 +264,42 @@ endif ( )
 # SPQR installation location
 #-------------------------------------------------------------------------------
 
+target_include_directories(spqr INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
 install ( TARGETS spqr
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
-    RUNTIME DESTINATION ${SUITESPARSE_BINDIR} )
-install ( FILES
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindSPQR.cmake
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindSPQR_CUDA.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+    RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+    PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+
 if ( NOT NSTATIC )
     install ( TARGETS spqr_static
+    EXPORT ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
-    endif ( )
-install ( FILES "Include/SuiteSparseQR_C.h"
+    target_include_directories(spqr_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+endif ( )
+
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+install ( FILES   "Include/SuiteSparseQR_C.h"
     "Include/SuiteSparseQR_definitions.h"
     "Include/SuiteSparseQR.hpp" DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
+
+
 
 #-------------------------------------------------------------------------------
 # Demo library and programs

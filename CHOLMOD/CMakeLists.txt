@@ -27,12 +27,12 @@ message ( STATUS "Building CHOLMOD version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../CCOLAMD/cmake_modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -80,9 +80,17 @@ else ( )
     find_package ( OpenMP )
 endif ( )
 
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
-find_package ( COLAMD 3.0.3 REQUIRED )
-find_package ( AMD 3.0.3 REQUIRED )
+find_package ( suitesparseconfig 7.0.0 REQUIRED )
+
+set(SUITESPARSE_CONFIG_STATIC SuiteSparse::suitesparseconfig_static)
+set(SUITESPARSE_CONFIG_LIBRARIES SuiteSparse::suitesparseconfig)
+
+find_package ( colamd 3.0.3 REQUIRED )
+set(COLAMD_STATIC SuiteSparse::colamd_static)
+set(COLAMD_LIBRARIES SuiteSparse::colamd)
+find_package ( amd 3.0.3 REQUIRED )
+set(AMD_STATIC SuiteSparse::amd_static)
+set(AMD_LIBRARIES SuiteSparse::amd)
 
 #-------------------------------------------------------------------------------
 # find CHOLMOD modules
@@ -112,7 +120,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NCHECK "ON: do not use Check Module.  OFF (default): use Check Module" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/Check )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Check )
         # Check module does not appear so don't use it
         set ( NCHECK true )
     endif ( )
@@ -127,7 +135,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NMATRIXOPS "ON: do not use MatrixOps Module.  OFF (default): use MatrixOps Module" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/MatrixOps )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/MatrixOps )
         # MatrixOps module does not appear so don't use it
         set ( NMATRIXOPS true )
     endif ( )
@@ -142,7 +150,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NCHOLESKY "ON: do not use Cholesky Module.  OFF (default): use Cholesky Module" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/Cholesky )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Cholesky )
         # Cholesky module does not appear so don't use it
         set ( NCHOLESKY true )
     endif ( )
@@ -160,7 +168,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NMODIFY "ON: do not use Modify Module.  OFF (default): use Modify Module" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/Modify )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Modify )
         # Modify module does not appear so don't use it
         set ( NMODIFY true )
     endif ( )
@@ -184,9 +192,13 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     if ( NOT NCAMD )
         # find CAMD and CCOLAMD
-        find_package ( CAMD 3.0.3 )
-        find_package ( CCOLAMD 3.0.3 )
-        if ( NOT CAMD_FOUND OR NOT CCOLAMD_FOUND )
+        find_package ( camd 3.0.3 )
+        set(CAMD_STATIC SuiteSparse::camd_static)
+        set(CAMD_LIBRARIES SuiteSparse::camd)
+        find_package ( ccolamd 3.0.3 )
+        set(CCOLAMD_STATIC SuiteSparse::ccolamd_static)
+        set(CCOLAMD_LIBRARIES SuiteSparse::ccolamd)
+        if ( NOT camd_FOUND OR NOT ccolamd_FOUND )
             # CAMD and/or CCOLAMD not found
             set ( NCAMD true )
         endif ( )
@@ -204,7 +216,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NPARTITION "ON: do not use METIS.  OFF (default): use METIS" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/Partition )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Partition )
         # Partition module does not appear so don't use it.  Since this
         # folder also includes the CAMD and CCOLAMD interfaces, NCAMD must
         # be set true here as well.
@@ -227,7 +239,7 @@ find_package ( AMD 3.0.3 REQUIRED )
 
     option ( NSUPERNODAL "ON: do not use Supernodal Module.  OFF (default): use Supernodal Module" off )
 
-    if ( NOT EXISTS ${CMAKE_SOURCE_DIR}/Supernodal )
+    if ( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Supernodal )
         # Supernodal module does not appear so don't use it
         set ( NSUPERNODAL true )
     endif ( )
@@ -274,7 +286,7 @@ configure_file ( "Config/cholmod_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Check Cholesky Core MatrixOps Modify Partition
-    Supernodal Include ${CMAKE_SOURCE_DIR} ${SUITESPARSE_CONFIG_INCLUDE_DIR}
+    Supernodal Include ${CMAKE_CURRENT_SOURCE_DIR} ${SUITESPARSE_CONFIG_INCLUDE_DIR}
     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
 
 #-------------------------------------------------------------------------------
@@ -423,22 +435,40 @@ endif ( )
 #-------------------------------------------------------------------------------
 # CHOLMOD installation location
 #-------------------------------------------------------------------------------
-
+target_include_directories(cholmod INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 install ( TARGETS cholmod
+    EXPORT  ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES 
-    cmake_modules/FindCHOLMOD.cmake
-    cmake_modules/FindCHOLMOD_CUDA.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES 
+#     cmake_modules/FindCHOLMOD.cmake
+#     cmake_modules/FindCHOLMOD_CUDA.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS cholmod_static
+        EXPORT  ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories(cholmod_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 endif ( )
 
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------
