@@ -28,8 +28,8 @@ message ( STATUS "Building SPEX version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
-    ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../COLAMD/cmake_modules
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_CURRENT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
 
 include ( SuiteSparsePolicy )
@@ -80,9 +80,8 @@ configure_file ( "Config/SPEX_version.tex.in"
 
 include_directories ( SPEX_Left_LU/Source SPEX_Util/Source Include 
     SPEX_Left_LU/Demo
-    ${SUITESPARSE_CONFIG_INCLUDE_DIR} 
     ${GMP_INCLUDE_DIR} ${MPFR_INCLUDE_DIR}
-    ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
+     )
 
 #-------------------------------------------------------------------------------
 # dynamic spex library properties
@@ -164,20 +163,38 @@ endif ( )
 #-------------------------------------------------------------------------------
 # SPEX installation location
 #-------------------------------------------------------------------------------
-
+target_include_directories( spex INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 install ( TARGETS spex
+EXPORT  ${PROJECT_NAME}Config
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindSPEX.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindSPEX.cmake
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
+#     COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS spex_static
+    EXPORT  ${PROJECT_NAME}Config
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories( spex_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 endif ( )
 
+install (EXPORT  ${PROJECT_NAME}Config
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE GraphBLAS::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+    
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+        # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------

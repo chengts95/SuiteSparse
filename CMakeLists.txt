@@ -25,7 +25,7 @@ set(TARGETS_LIST SuiteSparse_config
   SuiteSparse_GPURuntime GPUQREngine 
   #SPQR need cannot build due to my blas config
   GraphBLAS 
-  SPEX#
+ # SPEX cannot build with msvc
  )
 list(APPEND ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake)
 list(APPEND ${CMAKE_PREFIX_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake)
@@ -65,11 +65,11 @@ foreach(TARGET ${TARGETS_LIST})
   #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET} )
 
 
-  if(previous_target)
-    add_dependencies(${TARGET} ${previous_target})
-  endif()
+  # if(previous_target)
+  #   add_dependencies(${TARGET} ${previous_target})
+  # endif()
 
-  set(previous_target ${TARGET})
+  # set(previous_target ${TARGET})
 endforeach()
 
 

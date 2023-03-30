@@ -290,10 +290,6 @@ install ( TARGETS graphblas_matlab
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
 
-    
-
-    
-        
 install (EXPORT  ${PROJECT_NAME}Config
         FILE  ${PROJECT_NAME}Config.cmake
         NAMESPACE GraphBLAS::
