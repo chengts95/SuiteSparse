@@ -225,20 +225,41 @@ endif ( )
 #-------------------------------------------------------------------------------
 # UMFPACK installation location
 #-------------------------------------------------------------------------------
-
+target_include_directories(umfpack INTERFACE
+ $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+ 
 install ( TARGETS umfpack
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindUMFPACK.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+# install ( FILES
+#     ${SUITESPARSE_CMAKE_MODULES}
+#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse
+#     COMPONENT Development )
 if ( NOT NSTATIC )
+
+target_include_directories(umfpack_static INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
     install ( TARGETS umfpack_static
+    EXPORT ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
 endif ( )
-
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+# Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------
