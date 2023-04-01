@@ -155,6 +155,7 @@ set_target_properties ( spqr PROPERTIES
     CXX_STANDARD_REQUIRED 11
     C_STANDARD_REQUIRED 11
     SOVERSION ${SPQR_VERSION_MAJOR}
+    PUBLIC_HEADER "Include/SuiteSparseQR_C.h;Include/SuiteSparseQR_definitions.h;Include/SuiteSparseQR.hpp"
     WINDOWS_EXPORT_ALL_SYMBOLS ON )
 
 #-------------------------------------------------------------------------------
@@ -169,6 +170,7 @@ if ( NOT NSTATIC )
         CXX_STANDARD_REQUIRED 11
         C_STANDARD_REQUIRED 11
         OUTPUT_NAME spqr
+        PUBLIC_HEADER "Include/SuiteSparseQR_C.h;Include/SuiteSparseQR_definitions.h;Include/SuiteSparseQR.hpp"
         SOVERSION ${SPQR_VERSION_MAJOR} )
 
     if ( MSVC )
@@ -289,9 +291,7 @@ install (EXPORT  ${PROJECT_NAME}
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
         DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
-install ( FILES   "Include/SuiteSparseQR_C.h"
-    "Include/SuiteSparseQR_definitions.h"
-    "Include/SuiteSparseQR.hpp" DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+
     # Generate the version file
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(

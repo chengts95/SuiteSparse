@@ -105,12 +105,10 @@ install ( TARGETS  spqr_cuda
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindCOLAMD.cmake
-#     DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-#     COMPONENT Development )
+
 if ( NOT NSTATIC )
     install ( TARGETS  spqr_cuda_static
-    EXPORT ${PROJECT_NAME}
+    EXPORT spqr
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
     target_include_directories( spqr_cuda_static INTERFACE
         $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)

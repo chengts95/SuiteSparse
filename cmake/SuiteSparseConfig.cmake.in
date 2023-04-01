@@ -1,0 +1,2 @@
+# SuiteSparseConfig.cmake.in
+@FIND_PACKAGE_COMMANDS@

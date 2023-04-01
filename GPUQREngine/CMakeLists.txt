@@ -141,6 +141,7 @@ set_target_properties ( gpuqrengine PROPERTIES
 
 target_include_directories ( gpuqrengine PUBLIC
         ${CUDAToolkit_INCLUDE_DIRS}
+        PRIVATE
         ${GPUQRENGINE_INCLUDES} )
 
 if ( SUITESPARSE_CUDA )
@@ -170,6 +171,7 @@ if ( NOT NSTATIC )
 
     target_include_directories ( gpuqrengine_static PUBLIC
             ${CUDAToolkit_INCLUDE_DIRS}
+            PRIVATE
             ${GPUQRENGINE_INCLUDES} )
 
     if ( SUITESPARSE_CUDA )
@@ -184,19 +186,38 @@ endif ( )
 # installation location
 #-------------------------------------------------------------------------------
 
-install ( TARGETS gpuqrengine
+target_include_directories(gpuqrengine INTERFACE
+$<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
+
+install ( TARGETS gpuqrengine 
+    EXPORT ${PROJECT_NAME}
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindGPUQREngine.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
+
 if ( NOT NSTATIC )
     install ( TARGETS gpuqrengine_static
+    EXPORT ${PROJECT_NAME}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+    target_include_directories(gpuqrengine_static INTERFACE
+        $<INSTALL_INTERFACE:${SUITESPARSE_INCLUDEDIR}>)
 endif ( )
 
+install (EXPORT  ${PROJECT_NAME}
+        FILE  ${PROJECT_NAME}Config.cmake
+        NAMESPACE SuiteSparse::
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION  ${SUITESPARSE_LIBDIR}/cmake/)
+
+    # Generate the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion)
 #-------------------------------------------------------------------------------
 # Demo library and programs
 #-------------------------------------------------------------------------------
