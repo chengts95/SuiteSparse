@@ -26,9 +26,10 @@ message ( STATUS "Building LDL version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -62,8 +63,7 @@ configure_file ( "Config/ldl_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include ${SUITESPARSE_CONFIG_INCLUDE_DIR}
-    ${AMD_INCLUDE_DIR} )
+include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
 # dynamic ldl library properties
@@ -80,6 +80,10 @@ set_target_properties ( ldl PROPERTIES
     SOVERSION ${LDL_VERSION_MAJOR}
     PUBLIC_HEADER "Include/ldl.h"
     WINDOWS_EXPORT_ALL_SYMBOLS ON )
+
+target_include_directories ( ldl 
+    INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
 
 #-------------------------------------------------------------------------------
 # static ldl library properties
@@ -99,11 +103,31 @@ if ( NOT NSTATIC )
         set_target_properties ( ldl_static PROPERTIES
             OUTPUT_NAME ldl_static )
     endif ( )
+
+    target_include_directories ( ldl_static 
+        INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+                  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
+
 endif ( )
 
 #-------------------------------------------------------------------------------
 # add the library dependencies
 #-------------------------------------------------------------------------------
+
+target_link_libraries ( ldl PUBLIC amd suitesparseconfig )
+
+if ( NOT NSTATIC )
+    if ( TARGET amd_static )
+        target_link_libraries ( ldl_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( ldl_static PUBLIC amd )
+    endif ( )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( ldl_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( ldl_static PUBLIC suitesparseconfig )
+    endif ( )
+endif ( )
 
 # libm:
 if ( NOT WIN32 )
@@ -113,30 +137,45 @@ if ( NOT WIN32 )
     endif ( )
 endif ( )
 
-target_link_libraries ( ldl PRIVATE
-    ${SUITESPARSE_CONFIG_LIBRARIES} ${AMD_LIBRARIES} )
-
-if ( NOT NSTATIC )
-    target_link_libraries ( ldl_static PUBLIC
-    ${SUITESPARSE_CONFIG_STATIC} ${AMD_STATIC} )
-endif ( )
-
 #-------------------------------------------------------------------------------
 # LDL installation location
 #-------------------------------------------------------------------------------
 
+include ( CMakePackageConfigHelpers )
+
 install ( TARGETS ldl
+    EXPORT LDLTargets
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindLDL.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS ldl_static
+        EXPORT LDLTargets
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
 endif ( )
+
+# create (temporary) export target file during build
+export ( EXPORT LDLTargets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/LDLTargets.cmake )
+
+# install export target, config and version files for find_package
+install ( EXPORT LDLTargets
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/LDL )
+
+configure_package_config_file (
+    Config/LDLConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/LDLConfig.cmake
+    INSTALL_DESTINATION ${SUITESPARSE_LIBDIR}/cmake/LDL )
+
+write_basic_package_version_file (
+    ${CMAKE_CURRENT_BINARY_DIR}/LDLConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion )
+
+install ( FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/LDLConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/LDLConfigVersion.cmake
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/LDL )
 
 #-------------------------------------------------------------------------------
 # Demo library and programs

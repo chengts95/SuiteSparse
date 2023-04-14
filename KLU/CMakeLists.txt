@@ -27,14 +27,15 @@ message ( STATUS "Building KLU version: v"
 #-------------------------------------------------------------------------------
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../BTF/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CHOLMOD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
+    ${CMAKE_SOURCE_DIR}/../BTF/build
+    ${CMAKE_SOURCE_DIR}/../CAMD/build
+    ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../CHOLMOD/build
+    ${CMAKE_SOURCE_DIR}/../COLAMD/build
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 include ( SuiteSparsePolicy )
 
@@ -94,8 +95,7 @@ configure_file ( "Config/klu_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include User ${SUITESPARSE_CONFIG_INCLUDE_DIR}
-    ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} ${BTF_INCLUDE_DIR} )
+include_directories ( Source Include User )
 
 #-------------------------------------------------------------------------------
 # dynamic klu library properties
@@ -112,6 +112,10 @@ set_target_properties ( klu PROPERTIES
     SOVERSION ${KLU_VERSION_MAJOR}
     PUBLIC_HEADER "Include/klu.h"
     WINDOWS_EXPORT_ALL_SYMBOLS ON )
+
+target_include_directories ( klu 
+    INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
 
 #-------------------------------------------------------------------------------
 # static klu library properties
@@ -131,6 +135,11 @@ if ( NOT NSTATIC )
         set_target_properties ( klu_static PROPERTIES
             OUTPUT_NAME klu_static )
     endif ( )
+
+    target_include_directories ( klu_static
+        INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+                  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
+
 endif ( )
 
 #-------------------------------------------------------------------------------
@@ -142,7 +151,6 @@ if ( NOT NCHOLMOD )
     file ( GLOB KLU_CHOLMOD_SOURCES "User/*.c" )
 
     add_library ( klu_cholmod SHARED ${KLU_CHOLMOD_SOURCES} )
-    include_directories ( ${CHOLMOD_INCLUDE_DIR} )
 
     set_target_properties ( klu_cholmod PROPERTIES
         VERSION ${KLU_VERSION_MAJOR}.${KLU_VERSION_MINOR}.${KLU_VERSION_SUB}
@@ -150,6 +158,10 @@ if ( NOT NCHOLMOD )
         C_STANDARD_REQUIRED ON
         SOVERSION ${KLU_VERSION_MAJOR}
         PUBLIC_HEADER "User/klu_cholmod.h" )
+
+    target_include_directories ( klu_cholmod 
+        INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+                  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
 
     if ( NOT NSTATIC )
         add_library ( klu_cholmod_static STATIC ${KLU_CHOLMOD_SOURCES} )
@@ -165,6 +177,11 @@ if ( NOT NCHOLMOD )
             set_target_properties ( klu_cholmod_static PROPERTIES
                 OUTPUT_NAME klu_cholmod_static )
         endif ( )
+
+        target_include_directories ( klu_cholmod_static 
+            INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+                      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
+
     endif ( )
 
 endif ( )
@@ -174,9 +191,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( klu PRIVATE ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( klu PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( klu_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( klu_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( klu_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # libm:
@@ -188,51 +209,68 @@ if ( NOT WIN32 )
 endif ( )
 
 # amd:
-target_link_libraries ( klu PRIVATE ${AMD_LIBRARIES} )
+target_link_libraries ( klu PUBLIC amd )
 if ( NOT NSTATIC )
-    target_link_libraries ( klu_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( klu_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( klu_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # colamd:
-target_link_libraries ( klu PRIVATE ${COLAMD_LIBRARIES} )
+target_link_libraries ( klu PUBLIC colamd )
 if ( NOT NSTATIC )
-    target_link_libraries ( klu_static PUBLIC ${COLAMD_STATIC} )
+    if ( TARGET colamd_static )
+        target_link_libraries ( klu_static PUBLIC colamd_static )
+    else ( )
+        target_link_libraries ( klu_static PUBLIC colamd )
+    endif ( )
 endif ( )
 
 # btf:
-target_link_libraries ( klu PRIVATE ${BTF_LIBRARIES} )
+target_link_libraries ( klu PUBLIC btf )
 if ( NOT NSTATIC )
-    target_link_libraries ( klu_static PUBLIC ${BTF_STATIC} )
+    if ( TARGET btf_static )
+        target_link_libraries ( klu_static PUBLIC btf_static )
+    else ( )
+        target_link_libraries ( klu_static PUBLIC btf )
+    endif ( )
 endif ( )
 
 if ( NOT NCHOLMOD )
 
     # cholmod:
     # link with CHOLMOD and its dependencies, both required and optional
-    target_link_libraries ( klu PRIVATE
-        ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        ${AMD_LIBRARIES} ${COLAMD_LIBRARIES}
-        ${CAMD_LIBRARIES} ${CCOLAMD_LIBRARIES} )
-    target_link_libraries ( klu_cholmod PRIVATE
-        ${CHOLMOD_LIBRARIES} ${CHOLMOD_CUDA_LIBRARIES}
-        ${AMD_LIBRARIES} ${COLAMD_LIBRARIES}
-        ${CAMD_LIBRARIES} ${CCOLAMD_LIBRARIES} )
+    target_link_libraries ( klu PUBLIC
+        cholmod cholmod_cuda )
+    target_link_libraries ( klu_cholmod PUBLIC
+        cholmod cholmod_cuda )
     if ( NOT NSTATIC )
-        target_link_libraries ( klu_static PUBLIC
-            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-            ${AMD_STATIC} ${COLAMD_STATIC}
-            ${CAMD_STATIC} ${CCOLAMD_STATIC} )
-        target_link_libraries ( klu_cholmod_static PUBLIC
-            ${CHOLMOD_STATIC} ${CHOLMOD_CUDA_STATIC}
-            ${AMD_STATIC} ${COLAMD_STATIC}
-            ${CAMD_STATIC} ${CCOLAMD_STATIC} )
+       if ( TARGET cholmod_static )
+            target_link_libraries ( klu_static PUBLIC cholmod_static )
+            target_link_libraries ( klu_cholmod_static PUBLIC cholmod_static )
+        else ( )
+            target_link_libraries ( klu_static PUBLIC cholmod )
+            target_link_libraries ( klu_cholmod_static PUBLIC cholmod )
+        endif ( )
+        if ( TARGET cholmod_cuda_static )
+            target_link_libraries ( klu_static PUBLIC cholmod_cuda_static )
+            target_link_libraries ( klu_cholmod_static PUBLIC cholmod_cuda_static )
+        else ( )
+            target_link_libraries ( klu_static PUBLIC cholmod_cuda )
+            target_link_libraries ( klu_cholmod_static PUBLIC cholmod_cuda )
+        endif ( )
     endif ( )
 
     # klu:
-    target_link_libraries ( klu_cholmod PUBLIC klu PRIVATE ${BTF_LIBRARIES} )
+    target_link_libraries ( klu_cholmod PUBLIC klu btf )
     if ( NOT NSTATIC )
-        target_link_libraries ( klu_cholmod_static PUBLIC
-            klu_static ${BTF_STATIC} )
+        if ( TARGET btf_static )
+            target_link_libraries ( klu_cholmod_static PUBLIC btf_static )
+        else ( )
+            target_link_libraries ( klu_cholmod_static PUBLIC btf )
+        endif ( )
     endif ( )
 
 endif ( )
@@ -241,32 +279,78 @@ endif ( )
 # KLU installation location
 #-------------------------------------------------------------------------------
 
+include ( CMakePackageConfigHelpers )
+
 install ( TARGETS klu
+    EXPORT KLUTargets
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindKLU.cmake
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindKLU_CHOLMOD.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
 
 if ( NOT NSTATIC )
     install ( TARGETS klu_static
+        EXPORT KLUTargets
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
 endif ( )
 
+# create (temporary) export target file during build
+export ( EXPORT KLUTargets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/KLUTargets.cmake )
+
+# install export target, config and version files for find_package
+install ( EXPORT KLUTargets
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU )
+
+configure_package_config_file (
+    Config/KLUConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KLUConfig.cmake
+    INSTALL_DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU )
+
+write_basic_package_version_file (
+    ${CMAKE_CURRENT_BINARY_DIR}/KLUConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion )
+
+install ( FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/KLUConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/KLUConfigVersion.cmake
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU )
+
 if ( NOT NCHOLMOD )
     install ( TARGETS klu_cholmod
+        EXPORT KLU_CHOLMODTargets
         LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
     if ( NOT NSTATIC )
         install ( TARGETS klu_cholmod_static
+            EXPORT KLU_CHOLMODTargets
             ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
     endif ( )
+
+    # create (temporary) export target file during build
+    export ( EXPORT KLU_CHOLMODTargets
+        FILE ${CMAKE_CURRENT_BINARY_DIR}/KLU_CHOLMODTargets.cmake )
+
+    # install export target, config and version files for find_package
+    install ( EXPORT KLU_CHOLMODTargets
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU_CHOLMOD )
+
+    configure_package_config_file (
+        Config/KLU_CHOLMODConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/KLU_CHOLMODConfig.cmake
+        INSTALL_DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU_CHOLMOD )
+
+    write_basic_package_version_file (
+        ${CMAKE_CURRENT_BINARY_DIR}/KLU_CHOLMODConfigVersion.cmake
+        COMPATIBILITY SameMajorVersion )
+
+    install ( FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/KLU_CHOLMODConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/KLU_CHOLMODConfigVersion.cmake
+        DESTINATION ${SUITESPARSE_LIBDIR}/cmake/KLU_CHOLMOD )
+
 endif ( )
 
 #-------------------------------------------------------------------------------

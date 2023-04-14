@@ -28,11 +28,13 @@ message ( STATUS "Building CHOLMOD version: v"
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../COLAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../AMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CAMD/cmake_modules
-    ${CMAKE_SOURCE_DIR}/../CCOLAMD/cmake_modules
     ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/cmake_modules )
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+    ${CMAKE_SOURCE_DIR}/../AMD/build
+    ${CMAKE_SOURCE_DIR}/../CAMD/build
+    ${CMAKE_SOURCE_DIR}/../CCOLAMD/build
+    ${CMAKE_SOURCE_DIR}/../COLAMD/build
+    ${CMAKE_SOURCE_DIR}/../SuiteSparse_config/build )
 
 option ( ENABLE_CUDA "Enable CUDA acceleration" on )
 
@@ -274,8 +276,7 @@ configure_file ( "Config/cholmod_version.tex.in"
 #-------------------------------------------------------------------------------
 
 include_directories ( Check Cholesky Core MatrixOps Modify Partition
-    Supernodal Include ${CMAKE_SOURCE_DIR} ${SUITESPARSE_CONFIG_INCLUDE_DIR}
-    ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
+    Supernodal Include ${CMAKE_SOURCE_DIR} )
 
 #-------------------------------------------------------------------------------
 # dynamic cholmod library properties
@@ -300,6 +301,10 @@ if ( SUITESPARSE_CUDA )
     set_target_properties ( cholmod PROPERTIES POSITION_INDEPENDENT_CODE on )
 endif ( )
 
+target_include_directories ( cholmod
+    INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
+
 #-------------------------------------------------------------------------------
 # static cholmod library properties
 #-------------------------------------------------------------------------------
@@ -323,6 +328,11 @@ if ( NOT NSTATIC )
         set_target_properties ( cholmod_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )
         set_target_properties ( cholmod_static PROPERTIES POSITION_INDEPENDENT_CODE on )
     endif ( )
+
+    target_include_directories ( cholmod_static
+        INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+                  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
+
 endif ( )
 
 #-------------------------------------------------------------------------------
@@ -330,9 +340,13 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # suitesparseconfig:
-target_link_libraries ( cholmod PRIVATE ${SUITESPARSE_CONFIG_LIBRARIES} )
+target_link_libraries ( cholmod PUBLIC suitesparseconfig )
 if ( NOT NSTATIC )
-    target_link_libraries ( cholmod_static PUBLIC ${SUITESPARSE_CONFIG_STATIC} )
+    if ( TARGET suitesparseconfig_static )
+        target_link_libraries ( cholmod_static PUBLIC suitesparseconfig_static )
+    else ( )
+        target_link_libraries ( cholmod_static PUBLIC suitesparseconfig )
+    endif ( )
 endif ( )
 
 # OpenMP:
@@ -358,15 +372,23 @@ if ( NOT WIN32 )
 endif ( )
 
 # amd:
-target_link_libraries ( cholmod PRIVATE ${AMD_LIBRARIES} )
+target_link_libraries ( cholmod PUBLIC amd )
 if ( NOT NSTATIC )
-    target_link_libraries ( cholmod_static PUBLIC ${AMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( cholmod_static PUBLIC amd_static )
+    else ( )
+        target_link_libraries ( cholmod_static PUBLIC amd )
+    endif ( )
 endif ( )
 
 # colamd:
-target_link_libraries ( cholmod PRIVATE ${COLAMD_LIBRARIES} )
+target_link_libraries ( cholmod PUBLIC colamd )
 if ( NOT NSTATIC )
-    target_link_libraries ( cholmod_static PUBLIC ${COLAMD_STATIC} )
+    if ( TARGET amd_static )
+        target_link_libraries ( cholmod_static PUBLIC colamd_static )
+    else ( )
+        target_link_libraries ( cholmod_static PUBLIC colamd )
+    endif ( )
 endif ( )
 
 # BLAS and LAPACK: for the Supernodal Module
@@ -394,15 +416,22 @@ endif ( )
 
 # camd and ccolamd:
 if ( NOT NCAMD )
-    include_directories ( ${CAMD_INCLUDE_DIR} )
-    target_link_libraries ( cholmod PRIVATE ${CAMD_LIBRARIES} )
+    target_link_libraries ( cholmod PUBLIC camd )
     if ( NOT NSTATIC )
-        target_link_libraries ( cholmod_static PUBLIC ${CAMD_STATIC} )
+        if ( TARGET camd_static )
+            target_link_libraries ( cholmod_static PUBLIC camd_static )
+        else ( )
+            target_link_libraries ( cholmod_static PUBLIC camd )
+        endif ( )
     endif ( )
-    include_directories ( ${CCOLAMD_INCLUDE_DIR} )
-    target_link_libraries ( cholmod PRIVATE ${CCOLAMD_LIBRARIES} )
+
+    target_link_libraries ( cholmod PUBLIC ccolamd )
     if ( NOT NSTATIC )
-        target_link_libraries ( cholmod_static PUBLIC ${CCOLAMD_STATIC} )
+        if ( TARGET ccolamd_static )
+            target_link_libraries ( cholmod_static PUBLIC ccolamd_static )
+        else ( )
+            target_link_libraries ( cholmod_static PUBLIC ccolamd )
+        endif ( )
     endif ( )
 endif ( )
 
@@ -416,9 +445,9 @@ endif ( )
 # cholmod_cuda
 if ( SUITESPARSE_CUDA )
     message ( STATUS "CHOLMOD cuda: " ${CHOLMOD_CUDA} )
-    target_link_libraries ( cholmod PRIVATE ${CHOLMOD_CUDA} )
+    target_link_libraries ( cholmod PUBLIC cholmod_cuda )
     if ( NOT NSTATIC )
-        target_link_libraries ( cholmod_static PUBLIC ${CHOLMOD_CUDA_STATIC} )
+        target_link_libraries ( cholmod_static PUBLIC cholmod_cuda_static )
     endif ( )
 endif ( )
 
@@ -426,20 +455,41 @@ endif ( )
 # CHOLMOD installation location
 #-------------------------------------------------------------------------------
 
+include ( CMakePackageConfigHelpers )
+
 install ( TARGETS cholmod
+    EXPORT CHOLMODTargets
     LIBRARY DESTINATION ${SUITESPARSE_LIBDIR}
     ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
     RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
     PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
-install ( FILES 
-    cmake_modules/FindCHOLMOD.cmake
-    cmake_modules/FindCHOLMOD_CUDA.cmake
-    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/SuiteSparse 
-    COMPONENT Development )
 if ( NOT NSTATIC )
     install ( TARGETS cholmod_static
+        EXPORT CHOLMODTargets
         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
 endif ( )
+
+# create (temporary) export target file during build
+export ( EXPORT CHOLMODTargets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODTargets.cmake )
+
+# install export target, config and version files for find_package
+install ( EXPORT CHOLMODTargets
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/CHOLMOD )
+
+configure_package_config_file (
+    Config/CHOLMODConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODConfig.cmake
+    INSTALL_DESTINATION ${SUITESPARSE_LIBDIR}/cmake/CHOLMOD )
+
+write_basic_package_version_file (
+    ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion )
+
+install ( FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODConfigVersion.cmake
+    DESTINATION ${SUITESPARSE_LIBDIR}/cmake/CHOLMOD )
 
 #-------------------------------------------------------------------------------
 # Demo library and programs
