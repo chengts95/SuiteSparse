@@ -1,0 +1,13 @@
+{
+
+    "cmake.configureEnvironment": {
+        "CMAKE_TOOLCHAIN_FILE": "D:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+    },
+    "cmake.environment": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "MKLROOT":"C:/Program Files (x86)/Intel/oneAPI/mkl/latest"
+    },
+
+
+}
