@@ -33,7 +33,8 @@ else ( )
         VERSION "${SPQR_VERSION_MAJOR}.${SPQR_VERSION_MINOR}.${SPQR_VERSION_SUB}"
         LANGUAGES C CXX )
 endif ( )
-
+include_directories(   ${CMAKE_SOURCE_DIR}/../GPUQREngine/Include
+${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include)
 set ( CMAKE_CXX_STANDARD 17 )
 set ( CMAKE_C_STANDARD 11 )
 
@@ -91,16 +92,16 @@ target_include_directories ( spqr_cuda_static PRIVATE
 set_target_properties ( spqr_cuda_static PROPERTIES CUDA_SEPARABLE_COMPILATION on )
 set_target_properties ( spqr_cuda_static PROPERTIES POSITION_INDEPENDENT_CODE on )
 
-target_link_libraries ( spqr_cuda cholmod )
+target_link_libraries ( spqr_cuda PRIVATE cholmod )
 if ( TARGET cholmod_static )
     target_link_libraries ( spqr_cuda_static PUBLIC cholmod_static )
 else ( )
     target_link_libraries ( spqr_cuda_static PUBLIC cholmod )
 endif ( )
 if ( SUITESPARSE_CUDA )
-    target_link_libraries ( spqr_cuda PRIVATE CUDA::nvrtc CUDA::cudart_static
+    target_link_libraries ( spqr_cuda PRIVATE gpuqrengine  suitesparse_gpuruntime suitesparseconfig CUDA::nvrtc CUDA::cudart_static
         CUDA::nvToolsExt CUDA::cublas )
-    target_link_libraries ( spqr_cuda_static PUBLIC CUDA::nvrtc CUDA::cudart_static
+    target_link_libraries ( spqr_cuda_static PUBLIC gpuqrengine_static suitesparse_gpuruntime_static suitesparseconfig_static  CUDA::nvrtc CUDA::cudart_static
         CUDA::nvToolsExt CUDA::cublas )
 endif ( )
 

@@ -99,7 +99,10 @@ endif ( )
 
 if ( SUITESPARSE_CUDA )
     # with CUDA
-    include_directories ( SPQRGPU ${CUDAToolkit_INCLUDE_DIRS} )
+    include_directories ( SPQRGPU ${CUDAToolkit_INCLUDE_DIRS} 
+     ${CMAKE_SOURCE_DIR}/../GPUQREngine/Include
+     ${CMAKE_SOURCE_DIR}/../SuiteSparse_GPURuntime/Include
+     )
     link_directories ( "SPQRGPU" "${CUDA_LIBRARIES}" "/usr/local/cuda/lib64/stubs" "/usr/local/cuda/lib64" )
 endif ( )
 

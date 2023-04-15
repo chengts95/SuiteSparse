@@ -116,7 +116,7 @@ else ( )
 endif ( )
 
 set ( GPUQRENGINE_INCLUDES Include Include/Kernel
-    Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize )
+    Include/Kernel/Apply Include/Kernel/Assemble Include/Kernel/Factorize ../SuiteSparse_GPURuntime/Include)
 
 include_directories ( ${GPUQRENGINE_INCLUDES} ${CUDAToolkit_INCLUDE_DIRS} )
 
@@ -145,7 +145,7 @@ if ( SUITESPARSE_CUDA )
 
     set_target_properties ( gpuqrengine PROPERTIES POSITION_INDEPENDENT_CODE ON )
     set_target_properties ( gpuqrengine PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
-    target_link_libraries ( gpuqrengine PRIVATE CUDA::nvrtc CUDA::cudart_static
+    target_link_libraries ( gpuqrengine PRIVATE suitesparse_gpuruntime suitesparseconfig CUDA::nvrtc CUDA::cudart_static
         CUDA::nvToolsExt CUDA::cublas )
 endif ( )
 

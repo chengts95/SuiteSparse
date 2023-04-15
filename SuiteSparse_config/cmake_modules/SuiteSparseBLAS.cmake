@@ -16,7 +16,19 @@
 # https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.htm
 
 cmake_minimum_required ( VERSION 3.22 )
-
+add_compile_definitions(BLAS_UNDERSCORE)
+set ( BLA_SIZEOF_INTEGER 4 )
+set ( SuiteSparse_BLAS_integer "int32_t" )
+if(ALLOW_64BIT_BLAS)
+add_compile_definitions (BLAS64 )
+set ( BLA_SIZEOF_INTEGER 8 )
+set ( SuiteSparse_BLAS_integer "int64_t" )
+else()
+add_compile_definitions (BLAS32 )
+endif()
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+return()
 # To select a specific BLAS: set to the BLA_VENDOR options from FindBLAS.cmake
 if ( DEFINED ENV{BLA_VENDOR} )
     set ( BLA_VENDOR $ENV{BLA_VENDOR} )

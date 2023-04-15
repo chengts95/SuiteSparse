@@ -103,7 +103,7 @@ configure_file ( "Config/umfpack_version.tex.in"
 # include directories
 #-------------------------------------------------------------------------------
 
-include_directories ( Source Include )
+include_directories ( Source Include  ${CMAKE_SOURCE_DIR}/../AMD/include)
 
 #-------------------------------------------------------------------------------
 # dynamic umfpack library properties
