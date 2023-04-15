@@ -240,10 +240,6 @@ endif ( )
 
 if ( NOT NCHOLMOD )
 
-    # cholmod:
-    # link with CHOLMOD and its dependencies, both required and optional
-    target_link_libraries ( klu PUBLIC
-        cholmod cholmod_cuda )
     target_link_libraries ( klu_cholmod PUBLIC
         cholmod cholmod_cuda )
     if ( NOT NSTATIC )
@@ -255,10 +251,8 @@ if ( NOT NCHOLMOD )
             target_link_libraries ( klu_cholmod_static PUBLIC cholmod )
         endif ( )
         if ( TARGET cholmod_cuda_static )
-            target_link_libraries ( klu_static PUBLIC cholmod_cuda_static )
             target_link_libraries ( klu_cholmod_static PUBLIC cholmod_cuda_static )
         else ( )
-            target_link_libraries ( klu_static PUBLIC cholmod_cuda )
             target_link_libraries ( klu_cholmod_static PUBLIC cholmod_cuda )
         endif ( )
     endif ( )
