@@ -145,7 +145,7 @@ if ( SUITESPARSE_CUDA )
 
     set_target_properties ( gpuqrengine PROPERTIES POSITION_INDEPENDENT_CODE ON )
     set_target_properties ( gpuqrengine PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
-    target_link_libraries ( gpuqrengine PRIVATE CUDA::nvrtc CUDA::cudart_static
+    target_link_libraries ( gpuqrengine PRIVATE suitesparse_gpuruntime suitesparseconfig CUDA::nvrtc CUDA::cudart_static
         CUDA::nvToolsExt CUDA::cublas )
 endif ( )
 
