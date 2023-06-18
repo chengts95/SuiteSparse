@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 project(SuiteSparse VERSION 7.0.1)
 set(PACKAGE_NAME SuiteSparse)
 set(LOCAL_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
-
+set(CMAKE_INSTALL_PREFIX ${LOCAL_INSTALL_PREFIX})
 set(BUILD_SPEX SPEX)
 
 if(MSVC)
@@ -55,8 +55,10 @@ foreach(TARGET ${TARGETS_LIST})
 endforeach()
 set(FIND_PACKAGE_COMMANDS "")
 
+
+set(CUDA_TARGETS CHOLMOD_CUDA)
 # 需要安装的目标列表
-set(PROJECT_LIST ${TARGETS_LIST}
+set(PROJECT_LIST ${TARGETS_LIST} ${CUDA_TARGETS}
 )
 set(SuiteSparse_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/SuiteSparseConfig.cmake")
 set(SuiteSparse_CONFIG_TEMPLATE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/SuiteSparseConfig.cmake.in")
