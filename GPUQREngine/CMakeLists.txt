@@ -13,10 +13,10 @@
 # cmake 3.22 is required to find the BLAS/LAPACK
 cmake_minimum_required ( VERSION 3.19 )
 
-set ( GPUQRENGINE_DATE "Jan 17, 2023" )
+set ( GPUQRENGINE_DATE "June 16, 2023" )
 set ( GPUQRENGINE_VERSION_MAJOR 2 )
 set ( GPUQRENGINE_VERSION_MINOR 0 )
-set ( GPUQRENGINE_VERSION_SUB   3 )
+set ( GPUQRENGINE_VERSION_SUB   4 )
 
 message ( STATUS "Building GPUQRENGINE version: v"
     ${GPUQRENGINE_VERSION_MAJOR}.
@@ -63,10 +63,10 @@ endif ( )
 #-------------------------------------------------------------------------------
 
 # for the library itself
-find_package ( SuiteSparse_config 7.0.0 REQUIRED )
+find_package ( SuiteSparse_config 7.1.0 REQUIRED )
 
 if ( SUITESPARSE_CUDA )
-    find_package ( SuiteSparse_GPURuntime 2.0.3 REQUIRED )
+    find_package ( SuiteSparse_GPURuntime 2.0.4 REQUIRED )
 endif ( )
 
 # Demo disabled for GPUQREngine v2.x
@@ -74,12 +74,12 @@ set ( DEMO_OK false )
 
 if ( DEMO AND DEMO_OK )
     # for the demo only:
-    find_package ( AMD 3.0.3 )
-    find_package ( COLAMD 3.0.3 )
-    find_package ( CAMD 3.0.3 )
-    find_package ( CCOLAMD 3.0.3 )
-    find_package ( CHOLMOD 4.0.3 )
-    find_package ( CHOLMOD_CUDA 4.0.3 )
+    find_package ( AMD 3.0.4 )
+    find_package ( COLAMD 3.0.4 )
+    find_package ( CAMD 3.0.4 )
+    find_package ( CCOLAMD 3.0.4 )
+    find_package ( CHOLMOD 4.0.4 )
+    find_package ( CHOLMOD_CUDA 4.0.4 )
 endif ( )
 
 if ( SUITESPARSE_CUDA AND CHOLMOD_FOUND AND AMD_FOUND AND COLAMD_FOUND AND 
@@ -145,7 +145,7 @@ if ( SUITESPARSE_CUDA )
 
     set_target_properties ( gpuqrengine PROPERTIES POSITION_INDEPENDENT_CODE ON )
     set_target_properties ( gpuqrengine PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
-    target_link_libraries ( gpuqrengine PRIVATE suitesparse_gpuruntime suitesparseconfig CUDA::nvrtc CUDA::cudart_static
+    target_link_libraries ( gpuqrengine PRIVATE CUDA::nvrtc CUDA::cudart_static
         CUDA::nvToolsExt CUDA::cublas )
 endif ( )
 
