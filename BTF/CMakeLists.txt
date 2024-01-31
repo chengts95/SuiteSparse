@@ -92,7 +92,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME btf
         SOVERSION ${BTF_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( btf_static PROPERTIES
             OUTPUT_NAME btf_static )
     endif ( )

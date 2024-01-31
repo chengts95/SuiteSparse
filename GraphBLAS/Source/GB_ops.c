@@ -537,7 +537,7 @@ const GxB_Format_Value GxB_FORMAT_DEFAULT = GxB_BY_ROW ;
 // predefined built-in monoids
 //------------------------------------------------------------------------------
 
-#if GB_COMPILER_MSC
+#if GB_COMPILER_MSC || (__clang__ && defined (_MSC_VER))
 #define GB_FC32_ONE  {1.0f, 0.0f}
 #define GB_FC64_ONE  {1.0 , 0.0 }
 #define GB_FC32_ZERO {0.0f, 0.0f}

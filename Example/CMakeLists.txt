@@ -165,7 +165,7 @@ set_target_properties ( my_static PROPERTIES
     OUTPUT_NAME my
     SOVERSION ${MY_VERSION_MAJOR} )
 
-if ( MSVC )
+if ( WIN32 )
     set_target_properties ( my_static PROPERTIES
         OUTPUT_NAME my_static )
 endif ( )

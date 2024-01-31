@@ -126,7 +126,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME suitesparse_gpuruntime
         SOVERSION ${SUITESPARSE_GPURUNTIME_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( suitesparse_gpuruntime_static PROPERTIES
             OUTPUT_NAME suitesparse_gpuruntime_static )
     endif ( )

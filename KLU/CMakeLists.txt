@@ -143,7 +143,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME klu
         SOVERSION ${KLU_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( klu_static PROPERTIES
             OUTPUT_NAME klu_static )
     endif ( )
@@ -175,7 +175,7 @@ if ( NOT NCHOLMOD )
             OUTPUT_NAME klu_cholmod
             SOVERSION ${KLU_VERSION_MAJOR} )
 
-        if ( MSVC )
+        if ( WIN32 )
             set_target_properties ( klu_cholmod_static PROPERTIES
                 OUTPUT_NAME klu_cholmod_static )
         endif ( )

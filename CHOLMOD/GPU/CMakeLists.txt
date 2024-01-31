@@ -55,7 +55,7 @@ set_target_properties ( cholmod_cuda_static PROPERTIES
     OUTPUT_NAME cholmod_cuda
     SOVERSION ${CHOLMOD_VERSION_MAJOR} )
 
-if ( MSVC )
+if ( WIN32 )
     set_target_properties ( cholmod_cuda_static PROPERTIES
         OUTPUT_NAME cholmod_cuda_static )
 endif ( )

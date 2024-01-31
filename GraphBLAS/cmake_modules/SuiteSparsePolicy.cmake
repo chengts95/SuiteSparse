@@ -205,7 +205,7 @@ else ( )
 endif ( )
 
 # default C-to-Fortran name mangling if Fortran compiler not found
-if ( MSVC )
+if ( WIN32 )
     # MS Visual Studio Fortran compiler does not mangle the Fortran name
     set ( SUITESPARSE_C_TO_FORTRAN "(name,NAME) name"
         CACHE STRING "C to Fortan name mangling" )

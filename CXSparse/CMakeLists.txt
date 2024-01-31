@@ -37,7 +37,7 @@ include ( SuiteSparsePolicy )
 
 # MS Visual Studio does not support the complex type for ANSI C11.
 
-if ( MSVC )
+if ( WIN32 )
     option ( NCOMPLEX "ON (default): complex data type disabled.  OFF: complex data type enabled." on )
 else ( )
     option ( NCOMPLEX "ON: complex data type disabled.  OFF (default): complex data type enabled." off )
@@ -124,7 +124,7 @@ if ( NOT NSTATIC )
         C_STANDARD_REQUIRED 11
         SOVERSION ${CXSPARSE_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( cxsparse_static PROPERTIES
             OUTPUT_NAME cxsparse_static )
     endif ( )

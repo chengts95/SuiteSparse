@@ -104,7 +104,7 @@ if ( NOT NSTATIC )
         C_STANDARD_REQUIRED 11
         SOVERSION ${CSPARSE_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( csparse_static PROPERTIES
             OUTPUT_NAME csparse_static )
     endif ( )

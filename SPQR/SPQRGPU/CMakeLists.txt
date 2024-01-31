@@ -54,7 +54,7 @@ set_target_properties ( spqr_cuda_static PROPERTIES
     OUTPUT_NAME spqr_cuda
     SOVERSION ${SPQR_VERSION_MAJOR} )
 
-if ( MSVC )
+if ( WIN32 )
     set_target_properties ( spqr_cuda_static PROPERTIES
         OUTPUT_NAME spqr_cuda_static )
 endif ( )

@@ -92,7 +92,7 @@ if ( NOT NSTATIC )
         C_STANDARD_REQUIRED 11
         SOVERSION ${CCOLAMD_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( ccolamd_static PROPERTIES
             OUTPUT_NAME ccolamd_static )
     endif ( )

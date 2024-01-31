@@ -181,7 +181,7 @@ set_property(TARGET mongoose_lib PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(mongoose_lib
         PROPERTIES OUTPUT_NAME mongoose)
 
-if(MSVC)
+if(WIN32)
         set_target_properties(mongoose_lib PROPERTIES
                 OUTPUT_NAME mongoose_static)
 endif()

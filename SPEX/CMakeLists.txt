@@ -111,7 +111,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME spex
         SOVERSION ${SPEX_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( spex_static PROPERTIES
             OUTPUT_NAME spex_static )
     endif ( )

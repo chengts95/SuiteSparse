@@ -92,7 +92,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME rbio
         SOVERSION ${RBIO_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( rbio_static PROPERTIES
             OUTPUT_NAME rbio_static )
     endif ( )

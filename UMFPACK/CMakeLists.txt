@@ -154,7 +154,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME umfpack
         SOVERSION ${UMFPACK_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( umfpack_static PROPERTIES
             OUTPUT_NAME umfpack_static )
     endif ( )

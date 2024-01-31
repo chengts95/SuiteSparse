@@ -164,7 +164,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME gpuqrengine
         SOVERSION ${GPUQRENGINE_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( gpuqrengine_static PROPERTIES
             OUTPUT_NAME gpuqrengine_static )
     endif ( )

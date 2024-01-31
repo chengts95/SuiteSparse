@@ -316,7 +316,7 @@ if ( NOT NSTATIC )
        SOVERSION ${GraphBLAS_VERSION_MAJOR}
        C_STANDARD_REQUIRED 11 )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( graphblas_static PROPERTIES
             OUTPUT_NAME graphblas_static )
     endif ( )

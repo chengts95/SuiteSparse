@@ -100,7 +100,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME ldl
         SOVERSION ${LDL_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( ldl_static PROPERTIES
             OUTPUT_NAME ldl_static )
     endif ( )

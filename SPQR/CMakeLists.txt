@@ -173,7 +173,7 @@ if ( NOT NSTATIC )
         PUBLIC_HEADER "Include/SuiteSparseQR_C.h;Include/SuiteSparseQR_definitions.h;Include/SuiteSparseQR.hpp"
         SOVERSION ${SPQR_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( spqr_static PROPERTIES
             OUTPUT_NAME spqr_static )
     endif ( )

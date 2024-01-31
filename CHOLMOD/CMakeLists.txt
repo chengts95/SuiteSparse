@@ -324,7 +324,7 @@ if ( NOT NSTATIC )
         OUTPUT_NAME cholmod
         SOVERSION ${CHOLMOD_VERSION_MAJOR} )
 
-    if ( MSVC )
+    if ( WIN32 )
         set_target_properties ( cholmod_static PROPERTIES
             OUTPUT_NAME cholmod_static )
     endif ( )
